@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      e2e:
+        description: "Exécuter aussi les tests E2E (ingestion d'un échantillon réel, ~5 min)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  qualite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  e2e:
+    if: github.event_name == 'workflow_dispatch' && inputs.e2e
+    needs: qualite
+    runs-on: ubuntu-latest
+    env:
+      ADMIN_EMAIL: e2e@vehicult.test
+      ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD || 'e2e-mot-de-passe-local-uniquement' }}
+      PW_CHANNEL: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Constitue un petit catalogue réel (Hacker News 2023-2024) dans une base PGlite éphémère.
+      - run: npm run ingest -- step seed_taxonomy
+      - run: npm run ingest -- step discover_hn_stories '{"fromYear":2023,"toYear":2024,"minPoints":20}'
+      - run: npm run ingest -- step enrich
+      - run: npm run ingest -- step analyze
+      - run: npm run ingest -- step score
+      - run: npm run ingest -- step refresh_counts
+      - run: npm run test:e2e

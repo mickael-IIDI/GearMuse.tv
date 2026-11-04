@@ -1,0 +1,272 @@
+/**
+ * Taxonomie de référence (amorçage de la base). Extensible depuis l'administration.
+ *
+ * Les mots-clés sont écrits sous forme normalisée (minuscules, sans accents,
+ * ponctuation remplacée par des espaces). Ils alimentent le classifieur
+ * heuristique et la recherche. Préfixe "!" = mot-clé fort (poids ×2.5).
+ */
+
+export type SubDef = [slug: string, fr: string, en: string, keywords: string[]];
+export type UniverseDef = {
+  slug: string;
+  fr: string;
+  en: string;
+  descFr: string;
+  descEn: string;
+  icon: string;
+  color: string;
+  keywords: string[];
+  subs: SubDef[];
+};
+
+export const UNIVERSES: UniverseDef[] = [
+  {
+    slug: "automobile",
+    fr: "Automobile",
+    en: "Cars",
+    descFr:
+      "Supercars, voitures de collection, mécanique, restauration, compétition et histoire de l'automobile.",
+    descEn: "Supercars, classics, mechanics, restoration, motorsport and automotive history.",
+    icon: "car",
+    color: "#f5a524",
+    keywords: [
+      "!voiture", "!voitures", "!automobile", "!automobiles", "!supercar", "!supercars", "!hypercar", "!sports car",
+      "car", "cars", "auto", "coupe", "sedan", "berline", "hatchback", "pickup truck", "minivan",
+      "!gearbox", "boite de vitesses", "clutch", "embrayage", "carburetor", "carburateur", "!turbocharger",
+      "supercharger", "crankshaft", "vilebrequin", "camshaft", "cylinder head", "culasse", "differential",
+      "!nurburgring", "!test drive", "!road test", "!car review", "!car restoration", "!classic car", "!muscle car",
+      "!formula 1", "!f1 car", "!nascar", "!rallye", "!rally car", "drift", "!dragster", "!drag race", "racing car",
+      "voiture de course", "race car", "!car engine", "!v8", "!v12", "!v10", "!flat six", "!straight six",
+      "!rotary engine", "!wankel", "!internal combustion engine", "!combustion engine", "!moteur a explosion", "engine", "engines", "moteur", "moteurs", "piston", "pistons", "vehicle", "vehicles", "vehicule", "!ev", "!electric car", "!voiture electrique", "dashboard", "steering wheel",
+    ],
+    subs: [
+      ["supercars-et-hypercars", "Supercars et hypercars", "Supercars & hypercars", ["!supercar", "!supercars", "!hypercar", "!hypercars", "bugatti", "koenigsegg", "pagani", "laferrari", "mclaren p1", "chiron", "veyron", "nevera", "aventador", "huracan", "sf90", "enzo"]],
+      ["voitures-sportives", "Voitures sportives", "Sports cars", ["!sports car", "!voiture sportive", "sportive", "gt3", "gti", "track day", "hot hatch", "type r", "m3", "911", "cayman", "corvette", "supra", "nsx", "skyline", "gt r", "miata", "mx 5", "lotus elise"]],
+      ["automobiles-de-collection", "Automobiles de collection", "Classic cars", ["!classic car", "!classic cars", "!voiture de collection", "!vintage car", "oldtimer", "voiture ancienne", "concours d elegance", "barn find", "youngtimer", "pebble beach", "vintage", "pre war", "brass era", "250 gto", "300sl", "e type", "ds 19", "2cv"]],
+      ["voitures-de-luxe", "Voitures de luxe", "Luxury cars", ["!luxury car", "!voiture de luxe", "rolls royce", "bentley", "maybach", "limousine", "phantom", "s class", "classe s"]],
+      ["vehicules-electriques-et-hybrides", "Véhicules électriques et hybrides", "Electric & hybrid vehicles", ["!electric car", "!voiture electrique", "!ev", "!evs", "electric vehicle", "vehicule electrique", "hybrid", "hybride", "plug in", "tesla", "model s", "model 3", "model y", "cybertruck", "taycan", "rivian", "lucid", "leaf", "zoe", "ioniq", "byd", "charging", "recharge", "supercharger network"]],
+      ["voitures-thermiques", "Voitures thermiques", "Combustion cars", ["!v8", "!v10", "!v12", "!v6", "!w16", "flat six", "flat 6", "inline six", "straight six", "boxer engine", "moteur thermique", "combustion engine", "petrol", "gasoline", "diesel", "essence", "rotary", "wankel", "big block", "small block", "naturally aspirated", "atmospherique"]],
+      ["suv-et-4x4", "SUV et 4×4", "SUVs & 4x4", ["!suv", "!4x4", "crossover", "land cruiser", "range rover", "defender", "g class", "g wagon", "wrangler", "bronco", "4wd", "awd"]],
+      ["vehicules-tout-terrain", "Véhicules tout-terrain", "Off-road vehicles", ["!off road", "!offroad", "!tout terrain", "overland", "overlanding", "rock crawling", "rock crawler", "baja", "dakar", "trophy truck", "mud", "unimog"]],
+      ["preparation-automobile", "Préparation automobile", "Performance builds", ["!engine build", "preparation moteur", "!engine swap", "swap", "turbo build", "!dyno", "banc de puissance", "race car build", "build", "boost", "horsepower", "whp", "forged internals"]],
+      ["tuning-et-personnalisation", "Tuning et personnalisation", "Tuning & customisation", ["!tuning", "custom car", "body kit", "bodykit", "widebody", "stance", "lowrider", "!hot rod", "rat rod", "!restomod", "jdm", "wrap", "custom"]],
+      ["mecanique-et-reparations", "Mécanique et réparations", "Mechanics & repairs", ["!repair", "!reparation", "!how to fix", "fix", "diagnosis", "diagnostic", "how to replace", "remplacer", "timing belt", "courroie de distribution", "timing chain", "head gasket", "joint de culasse", "oil change", "vidange", "brake pads", "plaquettes", "teardown", "disassembly", "demontage", "mechanic", "mecanicien", "garage"]],
+      ["restauration-automobile", "Restauration automobile", "Car restoration", ["!restoration", "!restauration", "!restore", "!restoring", "!rebuild", "renovation", "barn find", "rust repair", "rust", "bodywork", "carrosserie", "paint", "peinture", "frame off", "nut and bolt"]],
+      ["essais-et-comparatifs-auto", "Essais et comparatifs", "Reviews & comparisons", ["!review", "!essai", "!test drive", "!comparison", "!comparatif", "versus", "vs", "first drive", "road test", "prise en main", "drag race", "track test", "tested"]],
+      ["histoire-de-l-automobile", "Histoire de l'automobile", "Automotive history", ["!history", "!histoire", "origins", "story of", "l histoire", "heritage", "evolution of", "the rise and fall", "legend", "legende", "1950s", "1960s", "1970s", "1980s"]],
+      ["design-automobile", "Design automobile", "Car design", ["!car design", "!design automobile", "design", "designer", "styling", "clay model", "!concept car", "coachbuilder", "carrossier", "pininfarina", "bertone", "zagato", "italdesign", "giugiaro", "gandini"]],
+      ["fabrication-et-usines-auto", "Fabrication et usines", "Factories & manufacturing", ["!factory", "!usine", "assembly line", "chaine de montage", "production line", "manufacturing", "how it s made", "gigafactory", "plant", "assembly", "made by hand", "fabrication"]],
+      ["technologies-et-innovations-auto", "Technologies et innovations", "Technology & innovation", ["technology", "technologie", "innovation", "self driving", "conduite autonome", "lidar", "adas", "active suspension", "by wire", "prototype", "patent", "invention", "camless", "variable compression"]],
+      ["competition-automobile", "Rallye, endurance, F1 et compétition", "Rally, endurance, F1 & racing", ["!formula 1", "!formula one", "!f1", "!grand prix", "!le mans", "!24 heures", "!24 hours", "endurance", "wec", "!rally", "!rallye", "wrc", "group b", "groupe b", "!drift", "drifting", "!nascar", "indycar", "indy 500", "dtm", "touring car", "hillclimb", "pikes peak", "drag racing", "karting", "kart", "!motorsport", "sport automobile", "onboard", "pole lap", "qualifying", "race", "racing", "course"]],
+      ["achat-fiabilite-et-entretien", "Achat, fiabilité et entretien", "Buying, reliability & maintenance", ["!buying guide", "!guide d achat", "!reliability", "!fiabilite", "maintenance", "entretien", "used car", "occasion", "what to buy", "avoid", "cost of ownership", "should you buy", "problems", "common issues"]],
+    ],
+  },
+  {
+    slug: "moto",
+    fr: "Moto",
+    en: "Motorcycles",
+    descFr: "Sportives, trails, customs, motos anciennes, mécanique, voyages et compétition à deux roues.",
+    descEn: "Sport bikes, adventure, customs, classics, mechanics, travel and racing on two wheels.",
+    icon: "moto",
+    color: "#ef4444",
+    keywords: [
+      "!moto", "!motos", "!motorcycle", "!motorcycles", "!motorbike", "!motorbikes", "!superbike", "!superbikes",
+      "!scooter", "!motocross", "!enduro", "!sidecar", "!motogp", "!moto gp", "!isle of man tt", "!dirt bike",
+      "!harley", "!harley davidson", "!ducati", "!kawasaki", "!ktm", "!royal enfield", "!moto guzzi", "!mv agusta",
+      "!aprilia", "!triumph motorcycle", "!bmw motorrad", "!wheelie", "biker", "motard", "two stroke", "2 stroke",
+      "deux temps", "!cafe racer", "!chopper", "rider", "pilote moto",
+    ],
+    subs: [
+      ["sportives", "Sportives", "Sport bikes", ["!sportbike", "!sport bike", "!superbike", "hypersport", "supersport", "r1", "r6", "cbr", "gsx r", "panigale", "zx 10r", "s1000rr", "rsv4", "fireblade", "hayabusa", "ninja"]],
+      ["roadsters", "Roadsters", "Naked bikes", ["!roadster", "!naked bike", "streetfighter", "mt 09", "mt 07", "z900", "monster", "speed triple", "duke", "street triple"]],
+      ["customs-et-cruisers", "Customs et cruisers", "Customs & cruisers", ["!custom", "!cruiser", "!chopper", "!bobber", "harley davidson", "softail", "sportster", "indian", "vulcan", "custom bike"]],
+      ["touring-et-grand-tourisme", "Touring et grand tourisme", "Touring", ["!touring", "!grand tourisme", "gold wing", "goldwing", "tourer", "sport touring", "road glide", "k1600"]],
+      ["trail-et-adventure", "Trail et adventure", "Adventure & dual sport", ["!adventure bike", "!adventure", "!trail", "!gs", "r 1250 gs", "africa twin", "tenere", "dual sport", "adv", "tiger 900", "390 adventure"]],
+      ["cross-et-enduro", "Cross et enduro", "Motocross & enduro", ["!motocross", "!enduro", "!supercross", "!dirt bike", "mx", "hard enduro", "trial", "erzberg", "endurocross"]],
+      ["scooters", "Scooters", "Scooters", ["!scooter", "!scooters", "vespa", "lambretta", "tmax", "maxi scooter", "moped", "cyclomoteur", "mobylette", "50cc"]],
+      ["motos-anciennes", "Motos anciennes", "Classic motorcycles", ["!vintage motorcycle", "!classic motorcycle", "!moto ancienne", "!motos anciennes", "!cafe racer", "brough superior", "vincent", "bsa", "norton", "vintage", "classic"]],
+      ["motos-electriques", "Motos électriques", "Electric motorcycles", ["!electric motorcycle", "!moto electrique", "zero motorcycles", "livewire", "energica", "electric bike", "electric dirt bike", "sur ron", "surron"]],
+      ["entretien-et-mecanique-moto", "Entretien et mécanique", "Maintenance & mechanics", ["!maintenance", "!entretien", "chain", "chaine", "carburetor", "carburateur", "valve clearance", "jeu aux soupapes", "repair", "reparation", "oil change", "vidange", "how to", "fix"]],
+      ["restauration-et-preparation-moto", "Restauration et préparation", "Restoration & builds", ["!restoration", "!restauration", "!rebuild", "build", "custom build", "cafe racer build", "barn find", "restore"]],
+      ["motogp-et-competition", "MotoGP et compétition", "MotoGP & racing", ["!motogp", "!moto gp", "!wsbk", "!worldsbk", "!isle of man tt", "tt races", "dakar", "grand prix", "bol d or", "speedway", "flat track", "race", "racing", "course", "marc marquez", "valentino rossi"]],
+      ["voyages-et-expeditions-moto", "Voyages et expéditions", "Travel & expeditions", ["!motorcycle trip", "!road trip", "!voyage", "!expedition", "around the world", "tour du monde", "travel", "adventure ride", "long way round", "long way down"]],
+      ["essais-et-comparatifs-moto", "Essais et comparatifs", "Reviews & comparisons", ["!review", "!essai", "!comparison", "!comparatif", "first ride", "test ride", "versus", "vs", "tested"]],
+      ["histoire-des-constructeurs-moto", "Histoire des constructeurs", "Manufacturer history", ["!history", "!histoire", "story of", "origins", "heritage", "the rise and fall"]],
+    ],
+  },
+  {
+    slug: "aviation",
+    fr: "Aviation",
+    en: "Aviation",
+    descFr:
+      "Avions de ligne, aviation légère, appareils militaires et historiques, moteurs, aérodynamique et sécurité aérienne.",
+    descEn: "Airliners, general aviation, military and historic aircraft, engines, aerodynamics and air safety.",
+    icon: "plane",
+    color: "#38bdf8",
+    keywords: [
+      "!avion", "!avions", "!aviation", "!aircraft", "!airplane", "!airplanes", "!aeroplane", "!airliner", "!airliners",
+      "plane", "planes", "jet", "jets", "!cockpit", "!pilot", "!pilots", "pilote", "flight", "flights", "airport",
+      "aeroport", "runway", "!helicopter", "!helicopters", "!helicoptere", "!airbus", "!boeing", "!cessna", "piper",
+      "!concorde", "!spitfire", "!f 16", "!f 35", "!f 22", "!sr 71", "!b 52", "!747", "!a380", "!a350", "!a320",
+      "!737", "!777", "!787", "glider", "planeur", "!turbofan", "!turbojet", "!turboprop", "!jet engine",
+      "!moteur a reaction", "propeller", "helice", "landing", "atterrissage", "takeoff", "decollage",
+      "!air traffic control", "atc", "faa", "!ntsb", "mayday", "!avionics", "!avionique", "!fly by wire", "aerospace",
+      "aeronautique", "!aeronautical", "wing", "!flight deck", "!air force", "!fighter jet", "!warbird",
+    ],
+    subs: [
+      ["avions-commerciaux", "Avions commerciaux", "Commercial aircraft", ["!airliner", "!airliners", "!airline", "compagnie aerienne", "a320", "a321", "a330", "a350", "a380", "737", "747", "757", "767", "777", "787", "embraer", "long courrier", "commercial aviation", "jumbo jet", "widebody", "narrowbody", "dreamliner"]],
+      ["aviation-generale", "Aviation générale", "General aviation", ["!general aviation", "!aviation generale", "cessna", "piper", "beechcraft", "cirrus", "bush plane", "aeroclub", "172", "cub", "bonanza", "small plane"]],
+      ["aviation-legere-et-ulm", "Aviation légère et ULM", "Light aircraft & ultralights", ["!ulm", "!ultralight", "!microlight", "light sport aircraft", "paramotor", "paramoteur", "gyrocopter", "autogire", "homebuilt", "kit plane", "experimental homebuilt"]],
+      ["jets-prives", "Jets privés", "Private jets", ["!private jet", "!jet prive", "!business jet", "gulfstream", "learjet", "citation", "falcon", "global 7500", "hondajet", "very light jet"]],
+      ["avions-militaires", "Avions militaires", "Military aircraft", ["!fighter jet", "!fighter", "!avion de chasse", "!military aircraft", "f 14", "f 15", "f 16", "f 18", "f 22", "f 35", "rafale", "mirage", "eurofighter", "typhoon", "su 27", "su 57", "mig", "sr 71", "u 2", "bomber", "b 2", "b 52", "b 1", "a 10", "carrier landing", "top gun", "air force", "armee de l air", "dogfight", "awacs", "stealth"]],
+      ["avions-historiques", "Avions historiques", "Historic aircraft", ["!warbird", "!warbirds", "!ww2 aircraft", "!spitfire", "p 51", "messerschmitt", "bf 109", "b 17", "b 29", "zero", "dc 3", "constellation", "concorde", "!historic aircraft", "avion historique", "wright brothers", "freres wright", "bleriot", "lancaster", "hurricane", "corsair", "ju 52"]],
+      ["helicopteres", "Hélicoptères", "Helicopters", ["!helicopter", "!helicopters", "!helicoptere", "!helicopteres", "rotor", "chinook", "black hawk", "apache", "robinson r44", "r22", "autorotation", "tiltrotor", "osprey", "v 22", "ecureuil", "super puma", "mi 26"]],
+      ["drones-motorises", "Drones motorisés", "Drones", ["!drone", "!drones", "!uav", "quadcopter", "multirotor", "fpv", "reaper", "predator", "bayraktar"]],
+      ["avions-experimentaux", "Avions expérimentaux", "Experimental aircraft", ["!experimental aircraft", "!x plane", "x 15", "x 59", "prototype aircraft", "avion experimental", "!flying car", "voiture volante", "evtol", "ekranoplan", "scaled composites", "rutan", "spruce goose", "flying wing", "aile volante"]],
+      ["aviation-electrique", "Aviation électrique", "Electric aviation", ["!electric aircraft", "!avion electrique", "!evtol", "electric plane", "solar impulse", "eviation", "joby", "lilium", "pipistrel", "electric flight"]],
+      ["aerodynamique", "Aérodynamique", "Aerodynamics", ["!aerodynamics", "!aerodynamique", "lift", "portance", "drag", "trainee", "airfoil", "profil d aile", "wind tunnel", "soufflerie", "vortex", "stall", "decrochage", "supersonic", "supersonique", "sound barrier", "mur du son", "hypersonic", "how planes fly", "how wings work"]],
+      ["moteurs-aeronautiques", "Moteurs aéronautiques", "Aircraft engines", ["!jet engine", "!jet engines", "!turbofan", "!turbojet", "!turboprop", "!turboshaft", "!moteur a reaction", "reacteur", "!radial engine", "moteur en etoile", "trent", "ge90", "ge9x", "cfm56", "leap", "merlin", "afterburner", "postcombustion", "ramjet", "scramjet", "gas turbine", "turbine a gaz"]],
+      ["pilotage-et-formation", "Pilotage et formation", "Flying & training", ["!pilot training", "!flight training", "!formation pilote", "!learning to fly", "apprendre a piloter", "checkride", "ppl", "atpl", "flight school", "landing tips", "crosswind", "vent de travers", "flight simulator", "simulateur de vol", "how to fly"]],
+      ["cockpits-et-avionique", "Cockpits et systèmes avioniques", "Cockpits & avionics", ["!cockpit", "!avionics", "!avionique", "glass cockpit", "!flight deck", "autopilot", "pilote automatique", "fms", "instruments", "hud", "fly by wire", "cockpit tour", "cockpit view"]],
+      ["fabrication-aeronautique", "Fabrication aéronautique", "Aircraft manufacturing", ["!aircraft factory", "!final assembly", "!assembly line", "chaine d assemblage", "manufacturing", "how airbus builds", "how boeing builds", "everett", "toulouse", "composites", "factory", "usine", "built"]],
+      ["maintenance-et-restauration-aero", "Maintenance et restauration", "Maintenance & restoration", ["!aircraft maintenance", "!maintenance aeronautique", "mro", "c check", "d check", "overhaul", "revision", "restoration", "restauration", "rebuild", "annual inspection", "engine change"]],
+      ["documentaires-et-histoire-aviation", "Documentaires et histoire de l'aviation", "Aviation history & documentaries", ["!aviation history", "!histoire de l aviation", "!documentary", "!documentaire", "the story of", "history", "histoire", "golden age", "pioneers", "pionniers"]],
+      ["technologies-aeronautiques", "Technologies aéronautiques", "Aerospace technology", ["technology", "technologie", "innovation", "composite", "stealth", "furtivite", "radar", "sensors", "materials", "materiaux"]],
+      ["securite-aerienne", "Analyse des incidents et sécurité aérienne", "Air safety & incident analysis", ["!crash", "!accident", "!incident", "!ntsb", "!bea", "!air crash", "!air safety", "!securite aerienne", "investigation", "enquete", "mayday", "emergency landing", "atterrissage d urgence", "what went wrong", "disaster", "catastrophe", "near miss"]],
+    ],
+  },
+  {
+    slug: "nautisme",
+    fr: "Bateaux",
+    en: "Boats & ships",
+    descFr:
+      "Bateaux à moteur, yachts, offshore, sous-marins, navires de commerce et militaires, propulsion et construction navale.",
+    descEn: "Powerboats, yachts, offshore racing, submarines, merchant and naval ships, propulsion and shipbuilding.",
+    icon: "boat",
+    color: "#22d3ee",
+    keywords: [
+      "!bateau", "!bateaux", "!boat", "!boats", "ship", "ships", "!navire", "!navires", "!yacht", "!yachts",
+      "!superyacht", "!submarine", "!submarines", "!sous marin", "!sous marins", "vessel", "hull", "coque",
+      "!outboard", "!hors bord", "inboard", "!marine engine", "!moteur marin", "harbor", "harbour", "!cargo ship",
+      "!container ship", "!porte conteneurs", "tanker", "petrolier", "!aircraft carrier", "!porte avions",
+      "destroyer", "frigate", "fregate", "!battleship", "cuirasse", "ferry", "tugboat", "remorqueur", "!icebreaker",
+      "brise glace", "!jet ski", "!jetski", "catamaran", "trawler", "chalutier", "!fishing boat", "!riva",
+      "!powerboat", "hydrofoil", "hovercraft", "aeroglisseur", "!shipyard", "!chantier naval", "dry dock",
+      "maritime", "!navy", "marine nationale", "!titanic", "!bismarck", "sailing", "voilier", "nautique", "nautical",
+    ],
+    subs: [
+      ["bateaux-a-moteur", "Bateaux à moteur", "Powerboats", ["!motorboat", "!powerboat", "!bateau a moteur", "!speedboat", "vedette", "center console", "boat"]],
+      ["yachts-et-superyachts", "Yachts et superyachts", "Yachts & superyachts", ["!yacht", "!yachts", "!superyacht", "!superyachts", "megayacht", "sunseeker", "azimut", "feadship", "lurssen", "benetti", "princess yachts"]],
+      ["bateaux-de-course", "Bateaux de course", "Race boats", ["!powerboat racing", "!offshore racing", "!hydroplane", "f1h2o", "class 1", "course offshore", "unlimited hydroplane", "drag boat", "race boat"]],
+      ["offshore", "Offshore", "Offshore", ["!offshore", "cigarette", "fountain", "deep v", "offshore powerboat"]],
+      ["bateaux-de-peche", "Bateaux de pêche", "Fishing boats", ["!fishing boat", "!bateau de peche", "!trawler", "!chalutier", "crab boat", "deadliest catch", "sportfishing", "fishing vessel"]],
+      ["bateaux-de-plaisance", "Bateaux de plaisance", "Pleasure boats", ["!pleasure boat", "!plaisance", "cruiser", "bowrider", "pontoon boat", "houseboat", "peniche", "sailing", "voilier", "sailboat"]],
+      ["semi-rigides", "Semi-rigides", "RIBs", ["!rib", "!semi rigide", "zodiac", "inflatable boat", "pneumatique"]],
+      ["jet-skis", "Jet-skis", "Jet skis", ["!jet ski", "!jetski", "!sea doo", "waverunner", "pwc", "scooter des mers", "motomarine"]],
+      ["sous-marins", "Sous-marins", "Submarines", ["!submarine", "!submarines", "!sous marin", "!sous marins", "u boat", "uboat", "nuclear submarine", "sous marin nucleaire", "submersible", "bathyscaphe", "deep sea", "trieste"]],
+      ["navires-commerciaux", "Navires commerciaux", "Merchant ships", ["!cargo ship", "!merchant ship", "!bulk carrier", "vraquier", "!tanker", "petrolier", "lng carrier", "methanier", "ferry", "!cruise ship", "paquebot", "roro", "tugboat", "remorqueur", "icebreaker", "brise glace", "shipping"]],
+      ["porte-conteneurs", "Porte-conteneurs", "Container ships", ["!container ship", "!container ships", "!porte conteneurs", "maersk", "msc", "cma cgm", "ever given", "container terminal", "containers"]],
+      ["navires-militaires", "Navires militaires", "Naval ships", ["!warship", "!navire de guerre", "!aircraft carrier", "!porte avions", "!destroyer", "!frigate", "!fregate", "!battleship", "cuirasse", "navy", "marine nationale", "uss", "hms", "cruiser", "naval"]],
+      ["propulsion-marine", "Propulsion marine", "Marine propulsion", ["!marine propulsion", "!propulsion navale", "!propeller", "!helice", "azipod", "waterjet", "hydrojet", "ship engine", "largest engine", "two stroke diesel", "wartsila", "steam turbine", "nuclear propulsion", "shaft"]],
+      ["moteurs-hors-bord-et-in-board", "Moteurs hors-bord et in-board", "Outboard & inboard engines", ["!outboard", "!hors bord", "!inboard", "sterndrive", "mercury", "verado", "evinrude", "volvo penta", "outboard motor", "outboard engine"]],
+      ["restauration-nautique", "Restauration nautique", "Boat restoration", ["!boat restoration", "!restauration bateau", "!wooden boat", "bateau en bois", "refit", "rebuild", "fiberglass repair", "gelcoat", "restoration", "restauration", "restore"]],
+      ["entretien-et-mecanique-marine", "Entretien et mécanique marine", "Marine maintenance", ["!boat maintenance", "!entretien bateau", "winterize", "hivernage", "impeller", "marine engine repair", "antifouling", "maintenance", "repair"]],
+      ["navigation-et-electronique", "Navigation et électronique embarquée", "Navigation & electronics", ["!navigation", "chartplotter", "sonar", "radar", "gps", "ais", "autopilot", "electronics", "electronique embarquee", "celestial navigation"]],
+      ["construction-navale", "Construction navale", "Shipbuilding", ["!shipbuilding", "!construction navale", "!shipyard", "!chantier naval", "ship launch", "lancement", "hull construction", "boat building", "boatbuilding", "how ships are built"]],
+      ["histoire-maritime", "Histoire maritime", "Maritime history", ["!maritime history", "!histoire maritime", "titanic", "lusitania", "shipwreck", "epave", "naval history", "bismarck", "yamato", "liberty ship", "history", "histoire"]],
+      ["essais-et-comparatifs-nautisme", "Essais et comparatifs", "Reviews & comparisons", ["!boat review", "!boat test", "!essai bateau", "sea trial", "walkthrough", "review", "essai", "comparison", "comparatif"]],
+    ],
+  },
+  {
+    slug: "autres-vehicules",
+    fr: "Autres véhicules",
+    en: "Other vehicles",
+    descFr:
+      "Camions, trains, engins agricoles et de chantier, véhicules militaires, vans, motoneiges, robots, fusées et véhicules spatiaux.",
+    descEn: "Trucks, trains, farm and construction machinery, military vehicles, vans, robots, rockets and spacecraft.",
+    icon: "rocket",
+    color: "#a78bfa",
+    keywords: [
+      "!truck", "!trucks", "!camion", "!camions", "!lorry", "!bus", "!autocar", "!train", "!trains", "!locomotive",
+      "!locomotives", "!railway", "!railroad", "!chemin de fer", "!tgv", "!shinkansen", "!tractor", "!tracteur",
+      "!excavator", "!pelleteuse", "!bulldozer", "!tank", "!char d assaut", "!camper van", "!camping car",
+      "!snowmobile", "!motoneige", "!rocket", "!rockets", "!fusee", "!fusees", "!spacecraft", "!space shuttle",
+      "!navette spatiale", "!saturn v", "!falcon 9", "!starship", "!rocket engine", "!moteur fusee", "!mars rover",
+      "!atv", "!quad", "!forklift", "!crane", "!grue", "!combine harvester", "!moissonneuse", "!tunnel boring machine",
+      "!land speed record", "!rc car", "!self driving", "!autonomous vehicle", "!robotaxi", "!e bike", "!ebike",
+      "!hovercraft", "!amphibious", "launch vehicle", "lanceur", "booster", "spacex", "nasa", "apollo", "orbit",
+    ],
+    subs: [
+      ["camions-et-poids-lourds", "Camions et poids lourds", "Trucks & heavy vehicles", ["!truck", "!trucks", "!semi truck", "!lorry", "!camion", "!camions", "!poids lourd", "semi remorque", "18 wheeler", "scania", "volvo trucks", "kenworth", "peterbilt", "freightliner", "mack", "trucking", "trucker", "routier", "big rig"]],
+      ["bus-et-autocars", "Bus et autocars", "Buses & coaches", ["!bus", "!buses", "!autobus", "!autocar", "coach", "double decker", "trolleybus", "school bus"]],
+      ["trains-et-locomotives", "Trains et locomotives", "Trains & locomotives", ["!train", "!trains", "!locomotive", "!locomotives", "!railway", "!railroad", "!chemin de fer", "!tgv", "!shinkansen", "!steam locomotive", "!locomotive a vapeur", "high speed rail", "grande vitesse", "maglev", "metro", "subway", "tram", "tramway", "freight train", "rail", "signal box", "big boy"]],
+      ["engins-agricoles", "Engins agricoles", "Farm machinery", ["!agricultural machinery", "!machinisme agricole", "!combine harvester", "!moissonneuse", "farm machinery", "harvester", "forage harvester", "ensileuse", "sprayer", "agricole", "agricultural", "farming"]],
+      ["tracteurs", "Tracteurs", "Tractors", ["!tractor", "!tractors", "!tracteur", "!tracteurs", "john deere", "fendt", "massey ferguson", "new holland", "case ih", "claas", "kubota", "renault 4l"]],
+      ["engins-de-chantier", "Engins de chantier", "Construction machinery", ["!excavator", "!pelleteuse", "!bulldozer", "!bouteur", "!crane", "!grue", "dump truck", "tombereau", "mining truck", "wheel loader", "chargeuse", "caterpillar", "komatsu", "liebherr", "construction equipment", "!engins de chantier", "!tunnel boring machine", "tunnelier", "bagger 288", "belaz", "heavy equipment"]],
+      ["vehicules-industriels", "Véhicules industriels", "Industrial vehicles", ["!forklift", "!chariot elevateur", "industrial vehicle", "utility vehicle", "street sweeper", "garbage truck", "benne a ordures", "!fire truck", "camion de pompier", "ambulance", "airport tug"]],
+      ["vehicules-militaires-terrestres", "Véhicules militaires terrestres", "Military land vehicles", ["!tank", "!tanks", "!char d assaut", "!armored vehicle", "!blinde", "abrams", "leopard 2", "leclerc", "t 72", "t 34", "tiger tank", "sherman", "humvee", "apc", "ifv", "military vehicle", "tank museum"]],
+      ["camping-cars-et-vans", "Camping-cars et vans", "Campervans & motorhomes", ["!camper van", "!campervan", "!camping car", "!van life", "!vanlife", "!motorhome", "rv", "sprinter conversion", "van conversion", "amenagement van", "caravan", "caravane", "overland camper", "van build"]],
+      ["quads-et-ssv", "Quads et SSV", "ATVs & side-by-sides", ["!atv", "!quad", "!utv", "!ssv", "!side by side", "polaris rzr", "can am maverick", "quad bike"]],
+      ["motoneiges", "Motoneiges", "Snowmobiles", ["!snowmobile", "!snowmobiles", "!motoneige", "!motoneiges", "ski doo", "snowcat", "dameuse"]],
+      ["vehicules-amphibies", "Véhicules amphibies", "Amphibious vehicles", ["!amphibious", "!amphibie", "!amphibious vehicle", "amphicar", "duck boat", "dukw", "!hovercraft", "!aeroglisseur"]],
+      ["vehicules-experimentaux", "Véhicules expérimentaux", "Experimental vehicles", ["!experimental vehicle", "!land speed record", "!record de vitesse", "thrustssc", "thrust ssc", "bloodhound", "jet car", "rocket car", "prototype vehicle", "salt flats", "bonneville", "solar car", "voiture solaire", "dymaxion"]],
+      ["vehicules-telecommandes", "Véhicules télécommandés motorisés", "RC vehicles", ["!rc car", "!rc plane", "!rc boat", "!rc jet", "!voiture radiocommandee", "remote control", "radio controlled", "nitro rc", "modelisme", "scale model engine", "model engine"]],
+      ["robots-mobiles", "Robots mobiles", "Mobile robots", ["!mobile robot", "!robot mobile", "boston dynamics", "!mars rover", "!rover", "curiosity", "perseverance", "legged robot", "delivery robot", "agv", "lunar rover"]],
+      ["mobilites-electriques-legeres", "Mobilités électriques légères", "Light electric mobility", ["!e bike", "!ebike", "!electric scooter", "!trottinette electrique", "onewheel", "electric skateboard", "velo electrique", "gyroroue", "micromobility", "personal mobility"]],
+      ["vehicules-autonomes", "Véhicules autonomes", "Autonomous vehicles", ["!autonomous vehicle", "!self driving", "!vehicule autonome", "!robotaxi", "!driverless", "waymo", "full self driving", "fsd", "lidar"]],
+      ["fusees-et-vehicules-spatiaux", "Fusées et véhicules spatiaux", "Rockets & spacecraft", ["!rocket", "!rockets", "!fusee", "!fusees", "!spacecraft", "!vaisseau spatial", "!launch vehicle", "!lanceur", "!space shuttle", "!navette spatiale", "!saturn v", "!falcon 9", "!falcon heavy", "!starship", "!ariane", "!soyuz", "!apollo", "!rocket engine", "!moteur fusee", "raptor", "rs 25", "f 1 engine", "spacex", "nasa", "esa", "orbit", "orbital", "lunar module", "module lunaire", "iss", "space station", "reentry", "rentree atmospherique", "booster landing", "launch", "lancement"]],
+    ],
+  },
+];
+
+/** Thématiques transversales (F). */
+export const THEMES: [slug: string, fr: string, en: string, keywords: string[]][] = [
+  ["mecanique", "Mécanique", "Mechanics", ["!mechanic", "!mechanics", "!mecanique", "!how it works", "!comment ca marche", "teardown", "disassembly", "demontage", "gearbox", "transmission", "differential", "suspension", "clutch", "embrayage", "bearing", "piston", "crankshaft", "vilebrequin", "camshaft", "valve", "soupape"]],
+  ["ingenierie", "Ingénierie", "Engineering", ["!engineering", "!ingenierie", "!engineer", "!ingenieur", "explained", "explique", "design", "physics", "physique", "how does", "why do", "science", "analysis", "analyse"]],
+  ["motorisation", "Motorisation", "Powertrains", ["!engine", "!engines", "!moteur", "!moteurs", "!powertrain", "!motorisation", "!v8", "!v12", "!turbo", "horsepower", "chevaux", "torque", "couple", "cylinder", "cylindre", "rpm", "redline", "two stroke", "four stroke", "diesel", "radial", "rotary"]],
+  ["electricite-et-electronique", "Électricité et électronique", "Electrics & electronics", ["!electronics", "!electronique", "!electrical", "!electricite", "wiring", "cablage", "ecu", "sensor", "capteur", "inverter", "onduleur", "can bus", "alternator", "alternateur"]],
+  ["batteries", "Batteries", "Batteries", ["!battery", "!batteries", "!batterie", "lithium", "cell", "cellule", "solid state", "charging", "recharge", "kwh", "4680", "battery pack"]],
+  ["hydrogene", "Hydrogène", "Hydrogen", ["!hydrogen", "!hydrogene", "!fuel cell", "!pile a combustible", "mirai", "h2"]],
+  ["carburants-alternatifs", "Carburants alternatifs", "Alternative fuels", ["!biofuel", "!biocarburant", "!synthetic fuel", "!e fuel", "efuel", "!carburant synthetique", "ethanol", "e85", "lng", "cng", "gnv", "saf", "sustainable aviation fuel", "wood gas", "gazogene", "ammonia"]],
+  ["conception-et-design", "Conception et design", "Design", ["!design", "!designer", "!conception", "styling", "concept", "clay", "sketch", "aesthetics"]],
+  ["fabrication-industrielle", "Fabrication industrielle", "Manufacturing", ["!factory", "!usine", "!manufacturing", "!fabrication", "assembly line", "chaine de montage", "production", "how it s made", "casting", "fonderie", "forging", "forge", "machining", "usinage", "cnc", "welding", "soudure"]],
+  ["histoire", "Histoire", "History", ["!history", "!histoire", "!historic", "!historique", "ww1", "ww2", "world war", "guerre mondiale", "1900s", "1920s", "1930s", "1940s", "1950s", "1960s", "1970s", "archive", "archives", "vintage", "story of", "the rise and fall", "origins", "heritage"]],
+  ["innovation", "Innovation", "Innovation", ["!innovation", "!invention", "!breakthrough", "!revolutionary", "revolutionnaire", "future", "futur", "prototype", "concept", "new technology", "patent", "brevet"]],
+  ["competition", "Compétition", "Racing", ["!race", "!racing", "!course", "!motorsport", "!championship", "!championnat", "grand prix", "le mans", "rally", "rallye", "lap", "tour de piste", "qualifying", "podium", "record"]],
+  ["performances", "Performances", "Performance", ["!top speed", "!vitesse maximale", "!acceleration", "!0 60", "!0 100", "!horsepower", "!fastest", "plus rapide", "record", "lap time", "chrono", "dyno", "power", "puissance", "speed"]],
+  ["restaurations", "Restaurations", "Restorations", ["!restoration", "!restauration", "!restore", "!restoring", "!rebuild", "!rebuilding", "barn find", "rust", "refit", "renovation"]],
+  ["reparations", "Réparations", "Repairs", ["!repair", "!reparation", "!fix", "!fixing", "!diagnosis", "!diagnostic", "how to replace", "broken", "failure", "panne"]],
+  ["personnalisation", "Personnalisation", "Customisation", ["!custom", "!tuning", "!build", "!modification", "!mods", "swap", "widebody", "restomod", "hot rod", "personnalisation", "preparation"]],
+  ["essais", "Essais", "Reviews", ["!review", "!essai", "!test drive", "!first drive", "!road test", "!test", "first ride", "prise en main", "tested", "flight test", "sea trial"]],
+  ["comparatifs", "Comparatifs", "Comparisons", ["!comparison", "!comparatif", "!versus", "!vs", "!shootout", "!face a face", "which is better", "head to head"]],
+  ["documentaires", "Documentaires", "Documentaries", ["!documentary", "!documentaire", "!full documentary", "!docu", "mega factories", "megastructures", "the story of", "inside", "secrets of"]],
+  ["reportages", "Reportages", "Reports & features", ["!reportage", "!report", "!behind the scenes", "!dans les coulisses", "!feature", "visit", "visite", "inside", "tour", "a day with", "une journee"]],
+  ["tutoriels", "Tutoriels", "Tutorials", ["!tutorial", "!tutoriel", "!how to", "!comment", "!guide", "step by step", "pas a pas", "diy", "tips", "astuces", "beginner", "debutant", "explained", "explique", "lesson", "lecon"]],
+  ["economie-et-industrie", "Économie et industrie", "Economics & industry", ["!economics", "!economie", "!industry", "!industrie", "!business", "market", "marche", "supply chain", "logistics", "logistique", "bankruptcy", "faillite", "why companies", "profit", "price", "prix", "shipping industry", "airline industry"]],
+  ["reglementation-et-securite", "Réglementation et sécurité", "Regulation & safety", ["!safety", "!securite", "!crash test", "!regulation", "!reglementation", "!law", "!loi", "euro ncap", "iihs", "nhtsa", "emissions", "norme", "standard", "certification", "investigation", "accident", "crash"]],
+  ["aventures-et-voyages", "Aventures et voyages", "Adventure & travel", ["!adventure", "!aventure", "!travel", "!voyage", "!expedition", "!road trip", "around the world", "tour du monde", "journey", "crossing", "traversee", "trip"]],
+];
+
+/** Formats éditoriaux (filtre "Format"). */
+export const FORMATS: [slug: string, fr: string, en: string, keywords: string[]][] = [
+  ["essai", "Essai", "Review", ["!review", "!essai", "!test drive", "!first drive", "!road test", "!first ride", "!flight test", "!sea trial", "prise en main", "tested", "!walkaround", "walkthrough"]],
+  ["tutoriel", "Tutoriel", "Tutorial", ["!tutorial", "!tutoriel", "!how to", "!step by step", "!pas a pas", "!diy", "!guide", "tips", "astuces", "lesson", "lecon", "beginner"]],
+  ["reportage", "Reportage", "Report", ["!reportage", "!behind the scenes", "!coulisses", "!a day with", "!une journee", "!inside", "visit", "visite", "feature"]],
+  ["documentaire", "Documentaire", "Documentary", ["!documentary", "!documentaire", "!full documentary", "!docu", "!the story of", "!history of", "l histoire", "histoire de", "secrets of"]],
+  ["interview", "Interview", "Interview", ["!interview", "!entretien avec", "!conversation with", "!q&a", "!q a", "!podcast", "!talks with", "discussion"]],
+  ["conference", "Conférence", "Talk & lecture", ["!lecture", "!conference", "!talk", "!keynote", "!symposium", "!seminar", "!seminaire", "!presentation", "!ted", "!tedx", "!webinar", "course", "cours", "mit", "royal institution", "royal aeronautical society"]],
+  ["restauration", "Restauration", "Restoration", ["!restoration", "!restauration", "!restore", "!restoring", "!rebuild", "!barn find", "!refit"]],
+  ["demonstration", "Démonstration", "Demonstration", ["!demonstration", "!demo", "!explained", "!explique", "!animation", "!how it works", "!comment ca marche", "!cutaway", "!3d", "!in slow motion", "slow motion", "cutaway", "visualization", "simulation"]],
+  ["visite-d-usine", "Visite d'usine", "Factory tour", ["!factory tour", "!visite d usine", "!how it s made", "!inside the factory", "!assembly line", "!chaine de montage", "!production line", "!megafactories", "!mega factories", "!manufacturing", "!factory", "!usine"]],
+  ["competition", "Compétition", "Racing", ["!race", "!racing", "!onboard", "!highlights", "!qualifying", "!grand prix", "!championship", "!lap", "!rally stage", "!hillclimb", "!time attack", "course"]],
+];
+
+/** Technologies de propulsion (filtre "Technologie"). */
+export const TECHNOLOGIES: [slug: string, fr: string, en: string, keywords: string[]][] = [
+  ["thermique", "Thermique", "Combustion", ["!combustion", "!thermique", "!v8", "!v10", "!v12", "!v6", "!petrol", "!gasoline", "!essence", "!diesel", "!two stroke", "!2 stroke", "!deux temps", "!four stroke", "!4 stroke", "carburetor", "carburateur", "turbo", "piston", "rotary", "wankel", "radial engine", "big block"]],
+  ["electrique", "Électrique", "Electric", ["!electric", "!electrique", "!ev", "!evs", "!battery electric", "!tesla", "!electric motor", "!moteur electrique", "!evtol", "battery", "batterie", "charging", "recharge"]],
+  ["hybride", "Hybride", "Hybrid", ["!hybrid", "!hybride", "!plug in hybrid", "!phev", "!hybrid system", "prius", "kers", "mgu k", "e tense", "918"]],
+  ["hydrogene", "Hydrogène", "Hydrogen", ["!hydrogen", "!hydrogene", "!fuel cell", "!pile a combustible", "mirai", "nexo"]],
+  ["vapeur", "Vapeur", "Steam", ["!steam", "!vapeur", "!steam engine", "!machine a vapeur", "!steam locomotive", "!locomotive a vapeur", "!steam turbine", "stanley steamer", "boiler", "chaudiere"]],
+  ["propulsion-speciale", "Propulsion spéciale", "Special propulsion", ["!jet engine", "!turbojet", "!turbofan", "!turbine", "!rocket engine", "!moteur fusee", "!ramjet", "!scramjet", "!ion thruster", "!nuclear", "!nucleaire", "!pulsejet", "!rocket", "!fusee", "!afterburner", "!gas turbine", "!turboshaft", "!solar", "!solaire", "!magnetic levitation", "!maglev"]],
+];

@@ -1,0 +1,192 @@
+@import "tailwindcss";
+
+/*
+ * Système de design. Thème sombre par défaut ; clair via [data-theme="light"],
+ * ou automatique via [data-theme="system"] + prefers-color-scheme.
+ * L'accent (« ignition ») est configurable via --accent.
+ */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0a0c0f;
+  --bg-elev: #111419;
+  --bg-soft: #171b21;
+  --bg-hover: #1e232b;
+  --border: #252b34;
+  --text: #eef1f5;
+  --muted: #9aa3b2;
+  --faint: #6b7483;
+  --accent: #ffb020;
+  --accent-ink: #1b1200;
+  --accent-soft: rgba(255, 176, 32, 0.14);
+  --link: #6cc4ff;
+  --focus: #6cc4ff;
+  --danger: #f87171;
+  --success: #4ade80;
+  --chip-active-bg: #eef1f5;
+  --chip-active-text: #0a0c0f;
+  --shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f6f3;
+  --bg-elev: #ffffff;
+  --bg-soft: #ecece7;
+  --bg-hover: #e3e3dd;
+  --border: #dddcd5;
+  --text: #121418;
+  --muted: #555c68;
+  --faint: #7d8491;
+  --accent: #c2410c;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(194, 65, 12, 0.1);
+  --link: #075985;
+  --focus: #0369a1;
+  --danger: #b91c1c;
+  --success: #15803d;
+  --chip-active-bg: #121418;
+  --chip-active-text: #ffffff;
+  --shadow: 0 10px 30px -14px rgba(20, 20, 20, 0.25);
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    color-scheme: light;
+    --bg: #f6f6f3;
+    --bg-elev: #ffffff;
+    --bg-soft: #ecece7;
+    --bg-hover: #e3e3dd;
+    --border: #dddcd5;
+    --text: #121418;
+    --muted: #555c68;
+    --faint: #7d8491;
+    --accent: #c2410c;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(194, 65, 12, 0.1);
+    --link: #075985;
+    --focus: #0369a1;
+    --danger: #b91c1c;
+    --success: #15803d;
+    --chip-active-bg: #121418;
+    --chip-active-text: #ffffff;
+    --shadow: 0 10px 30px -14px rgba(20, 20, 20, 0.25);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elev: var(--bg-elev);
+  --color-soft: var(--bg-soft);
+  --color-hover: var(--bg-hover);
+  --color-line: var(--border);
+  --color-fg: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-link: var(--link);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius-thumb: 12px;
+}
+
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.prose-text a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-text p + p {
+  margin-top: 0.75em;
+}
+.prose-text h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 1.5em 0 0.5em;
+}
+.prose-text ul {
+  list-style: disc;
+  padding-left: 1.25em;
+  margin: 0.5em 0;
+}
+.prose-text li + li {
+  margin-top: 0.25em;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  gap: 32px 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.skip-link:focus {
+  left: 8px;
+}

@@ -188,13 +188,15 @@ export async function spellCorrect(q: string): Promise<{ terms: QueryTerm[]; sug
   const tokens = normalize(q).split(" ").filter(Boolean);
   let changed = false;
   const fixed = tokens.map((tok) => {
-    if (tok.length < 4 || /d/.test(tok) || STOPWORDS.has(tok) || dict.has(tok)) return tok;
+    if (tok.length < 4 || /\d/.test(tok) || STOPWORDS.has(tok) || dict.has(tok)) return tok;
     for (const w of dict.keys()) if (w.startsWith(tok)) return tok; // préfixe connu : pas de correction
+    // Tolérance proportionnelle à la longueur : 1 faute jusqu'à 6 lettres, 2 au-delà.
+    const maxDist = tok.length <= 6 ? 1 : 2;
     let best: { w: string; d: number; n: number } | null = null;
     for (const [w, n] of dict) {
-      if (Math.abs(w.length - tok.length) > 2) continue;
-      const d = editDistance(tok, w, 2);
-      if (d <= 2 && (!best || d < best.d || (d === best.d && n > best.n))) best = { w, d, n };
+      if (Math.abs(w.length - tok.length) > maxDist) continue;
+      const d = editDistance(tok, w, maxDist);
+      if (d <= maxDist && (!best || d < best.d || (d === best.d && n > best.n))) best = { w, d, n };
     }
     if (!best) return tok;
     changed = true;

@@ -254,6 +254,7 @@ export async function enrichVideos(opts: { videoIds?: number[]; limit?: number; 
             availabilityCheckedAt: new Date(),
             availabilityFailures: 0,
             isShort: (a.durationSeconds ?? 999) <= 60 && /#shorts/i.test(`${a.title} ${a.description}`) ? true : undefined,
+            isLive: a.liveBroadcastContent === "live" || a.liveBroadcastContent === "upcoming" || (a.durationSeconds ?? 0) > 12 * 3600,
             metadataSource: "youtube_api",
             metadataUpdatedAt: new Date(),
             needsReanalysis: true,
@@ -546,7 +547,7 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
     };
     const res = computeScore(input, scoring);
     const effective = v.scoreOverride ?? res.total;
-    const decision = decideStatus({ total: effective, confidence: res.confidence, relevance: analysisRow.output.relevance, inScope: analysisRow.output.inScope, availability: v.availability, isShort: v.isShort }, scoring.thresholds, ingestion.autoPublish);
+    const decision = decideStatus({ total: effective, confidence: res.confidence, relevance: analysisRow.output.relevance, inScope: analysisRow.output.inScope, availability: v.availability, isShort: v.isShort, isLive: v.isLive }, scoring.thresholds, ingestion.autoPublish);
     const statusChange = !v.statusLocked && decision.status !== v.status;
     await db
       .update(videos)

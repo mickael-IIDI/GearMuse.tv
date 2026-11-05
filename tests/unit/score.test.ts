@@ -66,6 +66,11 @@ describe("notation", () => {
     expect(strong.total).toBeGreaterThan(weak.total);
     expect(strong.aggregates.recommenderCount).toBe(4);
   });
+  it("ne qualifie de pépite qu'une vidéo recommandée et vue moins de 100 000 fois", () => {
+    const ev = [hn("a", "2015-01-05", 200, "community_upvote"), hn("b", "2018-01-01")];
+    expect(computeScore(base({ viewCount: 40_000, evidence: ev }), cfg).discoveryScore).toBeGreaterThan(0);
+    expect(computeScore(base({ viewCount: 975_000, evidence: ev }), cfg).discoveryScore).toBeNull();
+  });
   it("ne récompense pas la rareté sans recommandation", () => {
     const r = computeScore(base({ viewCount: 500 }), cfg);
     expect(r.breakdown.criteria.find((c) => c.key === "rarity")!.available).toBe(false);
@@ -96,6 +101,9 @@ describe("décision de publication", () => {
   });
   it("sans publication automatique, tout passe par la validation humaine", () => {
     expect(decideStatus({ total: 90, confidence: 0.9, relevance: 0.9, inScope: true, availability: "available", isShort: false }, t, false).status).toBe("pending_review");
+  });
+  it("exclut les diffusions en direct, même très bien notées", () => {
+    expect(decideStatus({ total: 95, confidence: 0.9, relevance: 0.9, inScope: true, availability: "available", isShort: false, isLive: true }, t, true).status).toBe("rejected");
   });
 });
 

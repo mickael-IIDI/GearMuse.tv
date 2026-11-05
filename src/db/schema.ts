@@ -203,6 +203,8 @@ export const videos = pgTable(
     availabilityCheckedAt: ts("availability_checked_at"),
     availabilityFailures: smallint("availability_failures").notNull().default(0),
     isShort: boolean("is_short").notNull().default(false),
+    /** Diffusion en direct en cours ou programmée, ou direct permanent archivé (> 12 h) : exclue du catalogue. */
+    isLive: boolean("is_live").notNull().default(false),
     /** Métadonnées complètes obtenues via l'API officielle (durée, date…). */
     metadataSource: text("metadata_source").$type<"youtube_api" | "rss" | "oembed" | "manual">(),
     metadataUpdatedAt: ts("metadata_updated_at"),

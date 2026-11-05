@@ -135,7 +135,8 @@ export function computeScore(input: ScoreInput, cfg: Settings["scoring"]): Score
   const confidence = r2((availWeight / totalWeight) * (0.5 + 0.5 * classConf) * (input.durationSeconds == null ? 0.9 : 1));
 
   const rarity = criteria.find((c) => c.key === "rarity");
-  const discoveryScore = rarity?.available ? Math.round(total * rarity.score * (n > 0 ? 1 : 0.7)) : null;
+  // « Pépite » : recommandée mais réellement peu vue (moins de 100 000 vues, comme HackerTube).
+  const discoveryScore = rarity?.available && (input.viewCount ?? Infinity) < 100_000 ? Math.round(total * rarity.score * (n > 0 ? 1 : 0.7)) : null;
 
   return {
     breakdown: { version: cfg.version, total, confidence, criteria, penalties },
@@ -153,13 +154,14 @@ export function computeScore(input: ScoreInput, cfg: Settings["scoring"]): Score
 }
 
 export function decideStatus(
-  p: { total: number; confidence: number; relevance: number; inScope: boolean; availability: Availability; isShort: boolean },
+  p: { total: number; confidence: number; relevance: number; inScope: boolean; availability: Availability; isShort: boolean; isLive?: boolean },
   cfg: Settings["scoring"]["thresholds"],
   autoPublish: boolean,
 ): { status: VideoStatus; reason: string } {
   if (p.availability === "unavailable" || p.availability === "private") return { status: "unavailable", reason: "Vidéo indisponible chez le fournisseur" };
   if (!p.inScope) return { status: "rejected", reason: "Hors périmètre thématique" };
   if (p.isShort) return { status: "rejected", reason: "Format Shorts exclu" };
+  if (p.isLive) return { status: "rejected", reason: "Diffusion en direct (en cours, programmée ou permanente) exclue" };
   if (p.total >= cfg.publish && p.confidence >= cfg.minConfidence && p.relevance >= cfg.minRelevance) {
     return autoPublish ? { status: "published", reason: `Publication automatique : score ${p.total}, confiance ${p.confidence}` } : { status: "pending_review", reason: "Publication automatique désactivée" };
   }

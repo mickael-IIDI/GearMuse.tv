@@ -22,7 +22,7 @@ export const JOB_TYPES: Record<string, { label: string; description: string; run
   discover_hn_mentions: { label: "Recommandeurs Hacker News", description: "Compte les personnes distinctes citant chaque vidéo du périmètre", run: (log, p) => discoverHnMentions(log, { limit: p.limit as number | undefined }) },
   discover_channels: { label: "Découverte chaînes suivies", description: "Flux RSS des chaînes vérifiées (et catalogue complet avec clé API)", run: (log, p) => discoverChannelFeeds(log, { backfillPages: p.backfillPages as number | undefined }) },
   discover_reddit: { label: "Découverte Reddit", description: "Meilleures publications des subreddits configurés (OAuth requis)", run: (log) => discoverReddit(log) },
-  enrich: { label: "Enrichir les métadonnées", description: "YouTube Data API (ou oEmbed sans clé) : titre, chaîne, durée, disponibilité", run: (log, p) => enrichVideos({ log, limit: p.limit as number | undefined }) },
+  enrich: { label: "Enrichir les métadonnées", description: "YouTube Data API (ou oEmbed sans clé) : titre, chaîne, durée, disponibilité", run: (log, p) => enrichVideos({ log, limit: p.limit as number | undefined, force: Boolean(p.force) }) },
   analyze: { label: "Analyser / classer", description: "Classification (heuristique ou modèle de langage)", run: (log, p) => analyzeVideos({ log, force: Boolean(p.force) }) },
   score: { label: "Noter et publier", description: "Score explicable, publication automatique ou file de validation", run: (log) => scoreVideos({ log }) },
   refresh_availability: { label: "Revérifier la disponibilité", description: "Contrôle périodique des vidéos (suppression, blocage, statistiques)", run: (log, p) => refreshAvailability({ log, olderThanDays: p.olderThanDays as number | undefined }) },

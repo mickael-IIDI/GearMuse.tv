@@ -6,22 +6,23 @@
 |---|---|
 | Stories Hacker News examinées (2007-2026, ≥ 5 points, liant YouTube) | 16 457 |
 | Vidéos candidates enregistrées | 1 343 |
-| Vérifiées via oEmbed (existence, intégrabilité) | 1 246 |
-| **Publiées automatiquement** (note ≥ 55, confiance ≥ 0,4, pertinence ≥ 0,55) | **206** |
-| En file de validation humaine | 562 |
-| Rejetées (hors périmètre ou insuffisantes) | 480 |
-| Indisponibles chez YouTube (supprimées / privées) | 57 |
-| Découvertes sans métadonnées (intégration désactivée, titre inaccessible sans clé API) | 38 |
+| Enrichies via la YouTube Data API (titre, description, mots-clés, durée, date, vues, langue, intégrabilité) | 1 254 |
+| **Publiées automatiquement** (note ≥ 55, confiance ≥ 0,4, pertinence ≥ 0,55) | **299** — toutes avec durée, date et vues |
+| En file de validation humaine | 631 |
+| Rejetées (hors périmètre, insuffisantes, Shorts, directs) | 324 |
+| Indisponibles chez YouTube (supprimées / privées) | 89 |
+| Pépites (recommandées, moins de 100 000 vues) | 50 |
+| Vidéos de plus d'une heure publiées | 34 |
 | Chaînes spécialisées vérifiées (Wikidata + flux RSS) | 27 sur 46 proposées |
-| Playlists visibles (≥ 3 vidéos publiées) | 5 sur 11 |
-| Marques avec au moins une vidéo publiée | 22 |
-| URL dans le sitemap | 272 |
+| Playlists visibles (≥ 3 vidéos publiées) | 9 sur 11 |
+| Marques avec au moins une vidéo publiée | 46 |
+| URL dans le sitemap | 407 |
+| Consommation API YouTube (deux enrichissements complets du catalogue) | 80 unités, 0 erreur (quota gratuit : 10 000 / jour) |
 
-Répartition des vidéos publiées : autres véhicules (dont espace) 120, aviation 43, automobile 35, bateaux 6, moto 2.
-Ce déséquilibre reflète les sources actuellement accessibles sans clé (Hacker News privilégie l'aéronautique, l'espace
-et l'ingénierie). Il se corrige en (1) validant la file de modération, (2) ajoutant la clé YouTube (catalogue complet des
-chaînes suivies via `discover_channels {"backfillPages":4}`, descriptions et durées qui renforcent la classification),
-(3) configurant Reddit (r/motorcycles, r/boating…).
+Répartition des vidéos publiées (univers principal) : autres véhicules (dont espace) 150, automobile 79, aviation 55,
+bateaux 12, moto 3. Ce déséquilibre reflète Hacker News (aéronautique, espace, ingénierie). Il se corrige en
+(1) validant la file de modération, (2) remontant le catalogue complet des chaînes suivies
+(`discover_channels {"backfillPages":4}`, désormais possible avec la clé), (3) configurant Reddit (r/motorcycles, r/boating…).
 
 Les 3 signalements visibles dans l'administration locale proviennent des tests automatisés.
 
@@ -41,7 +42,8 @@ Les 3 signalements visibles dans l'administration locale proviennent des tests a
 | Pipeline : découverte HN/chaînes/Reddit/import/propositions, normalisation, enrichissement, vérification, analyse, notation, publication, modération, actualisation | Terminé | Exécuté de bout en bout sur données réelles |
 | Notation explicable, seuils et pondérations configurables, provenance des analyses | Terminé | Unitaires |
 | Analyse par modèle de langage (Anthropic, sortie JSON contrainte, budget, journal des coûts) | Code terminé, **non exécuté** (pas de clé) | — |
-| YouTube Data API (vidéos, chaînes, catalogue des chaînes, quotas) | Code terminé, **non exécuté** (pas de clé) | — |
+| YouTube Data API : vidéos, chaînes, quotas, détection des directs | Terminé et exécuté sur tout le catalogue | Unitaires + appel réel |
+| YouTube Data API : remontée du catalogue complet des chaînes suivies (`backfillPages`) | Code terminé, **non exécuté** | — |
 | Reddit OAuth | Code terminé, **non exécuté** (pas d'identifiants) | — |
 | Back-office : tableau de bord, vidéos, fiche (édition, réanalyse, verrou), modération groupée, propositions, signalements, import unitaire et groupé, playlists, taxonomie, sources, tâches, analyses IA et coûts, réglages, journal d'audit, comptes et rôles | Terminé | E2E + tâches lancées depuis l'interface |
 | Sécurité : scrypt, sessions hachées, verrouillage, rôles, limitation de débit, CSP, validation zod, audit | Terminé | E2E (accès refusé, mauvais mot de passe) |
@@ -52,9 +54,9 @@ Les 3 signalements visibles dans l'administration locale proviennent des tests a
 
 ## Limites connues et travaux restants
 
-1. **Clé YouTube Data API absente** : pas de durée (filtres de durée et « Vidéos longues » vides), pas de date de publication pour les vidéos issues de Hacker News, peu de vues connues (pépites rares), confiance des notes plafonnée. Priorité n°1.
+1. **Couverture moto et bateaux encore faible** (3 et 12 vidéos publiées) : remonter le catalogue des chaînes suivies et configurer Reddit.
 2. **Validation éditoriale** : 562 vidéos attendent un humain ; c'est voulu (cas incertains), mais elle conditionne l'équilibre entre univers.
-3. **Classifieur à règles** : précis sur les titres explicites, plus faible sur les titres allusifs ; l'analyse IA (clé Anthropic) et les descriptions (clé YouTube) l'améliorent. Les résumés éditoriaux n'existent qu'avec l'IA ou la rédaction.
+3. **Classifieur à règles** : précis sur les titres explicites, plus faible sur les titres allusifs. Avec les descriptions YouTube, quelques sujets d'entreprise passent encore (ex. interviews d'Elon Musk classées « automobile » via Tesla) : la modération ou l'analyse IA (clé Anthropic) les écarte. Les résumés éditoriaux n'existent qu'avec l'IA ou la rédaction.
 4. **Recherche** lexicale uniquement (pas d'embeddings) ; à mesurer avant d'ajouter pgvector.
 5. **Limiteur de débit en mémoire** (par instance) : compléter par le pare-feu de l'hébergeur.
 6. **Purge à 12 mois** des propositions et signalements traités : à ajouter en tâche planifiée.

@@ -1,0 +1,1 @@
+ALTER TABLE "videos" ADD COLUMN "is_live" boolean DEFAULT false NOT NULL;

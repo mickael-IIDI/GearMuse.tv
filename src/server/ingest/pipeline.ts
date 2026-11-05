@@ -589,6 +589,31 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
       .where(eq(videos.id, v.id));
     log.stat(`status_${v.statusLocked ? v.status : decision.status}`);
   }
+  await capAutoPublishPerChannel(scoring.thresholds.maxAutoPublishPerChannel, log);
+}
+
+/**
+ * Plafond de diversité : pour une même chaîne, seules les N vidéos les mieux notées publiées automatiquement
+ * sans recommandation indépendante restent publiées ; les autres passent en validation humaine.
+ * Les décisions éditoriales (statut verrouillé) ne sont jamais modifiées.
+ */
+async function capAutoPublishPerChannel(cap: number, log: Logger) {
+  if (!Number.isFinite(cap) || cap <= 0) return;
+  const db = await getDb();
+  const res = await db.execute(sql`
+    with ranked as (
+      select v.id, row_number() over (partition by v.creator_id order by v.quality_score desc nulls last, v.view_count desc nulls last, v.id) as rn
+      from videos v where v.status = 'published' and not v.status_locked and v.recommender_count = 0 and v.creator_id is not null
+    )
+    update videos set status = 'pending_review', status_changed_at = now(),
+      status_reason = ${`Plafond de diversité : au plus ${cap} vidéos publiées automatiquement par chaîne sans recommandation indépendante`}
+    from ranked where videos.id = ranked.id and ranked.rn > ${cap}
+    returning videos.id`);
+  const n = ((res as unknown as { rows: unknown[] }).rows ?? []).length;
+  if (n) {
+    log.stat("capped_per_channel", n);
+    await log.info(`${n} vidéo(s) renvoyée(s) en validation par le plafond de diversité (${cap} par chaîne)`);
+  }
 }
 
 /** Remet en file l'analyse de vidéos (ex. après modification de la taxonomie). */

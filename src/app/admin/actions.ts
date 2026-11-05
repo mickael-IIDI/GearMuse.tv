@@ -16,7 +16,7 @@ import { ensureBootstrapAdmin } from "@/server/auth/bootstrap";
 import { hashPassword } from "@/server/auth/password";
 import { refreshCounts } from "@/server/catalog/seed";
 import { refreshSmartPlaylists, reorderPlaylist } from "@/server/catalog/playlists";
-import { importUrls } from "@/server/ingest/discovery";
+import { importUrls, upsertChannelSource } from "@/server/ingest/discovery";
 import { JOB_TYPES, runJob, runSteps, DAILY_STEPS } from "@/server/ingest/jobs";
 import { analyzeVideos, enrichVideos, rebuildSearchText, scoreVideos } from "@/server/ingest/pipeline";
 import { channelFeed } from "@/server/ingest/youtube";
@@ -324,11 +324,7 @@ export async function addSourceAction(_: ActionState, form: FormData): Promise<A
     const feed = await channelFeed(channelId);
     if (!feed) return { error: "Chaîne introuvable : le flux public de YouTube ne répond pas pour cet identifiant." };
     const official = form.get("official") === "on";
-    await db.insert(sources).values({ type: "youtube_channel", name: feed.title, config: { channelId }, universeHint: universe, trustLevel: trust, isOfficial: official, verifiedAt: new Date() }).onConflictDoNothing();
-    await db
-      .insert(creators)
-      .values({ key: `yt:channel:${channelId}`, channelId, name: feed.title, url: `https://www.youtube.com/channel/${channelId}`, isCuratedSource: true, isOfficial: official, trustLevel: trust })
-      .onConflictDoUpdate({ target: creators.key, set: { isCuratedSource: true, isOfficial: official, trustLevel: trust } });
+    await upsertChannelSource({ channelId, title: feed.title, universe, trust, official });
     await audit(s, "source_add", "source", channelId, null, { name: feed.title });
     revalidatePath("/admin/sources");
     return { ok: true, message: `Chaîne vérifiée et ajoutée : ${feed.title} (${feed.entries.length} vidéos récentes dans le flux).` };

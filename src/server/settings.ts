@@ -29,6 +29,11 @@ export const DEFAULT_SETTINGS = {
       minConfidence: 0.4,
       /** Pertinence thématique minimale pour la publication automatique. */
       minRelevance: 0.55,
+      /**
+       * Nombre maximal de vidéos publiées automatiquement par chaîne sans aucune recommandation indépendante
+       * (les mieux notées) ; le surplus part en validation humaine. Garantit la diversité des créateurs.
+       */
+      maxAutoPublishPerChannel: 25,
     },
     penalties: { short: 30, veryShort: 15, sensational: 5, embedDisabled: 3 },
   },

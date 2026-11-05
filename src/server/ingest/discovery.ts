@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, isNull, lt, notInArray, or, sql } from "drizzle-
 import { getDb } from "@/db/client";
 import { creators, importBatches, sources, videos } from "@/db/schema";
 import { classify } from "@/lib/taxonomy/classifier";
-import { CURATED_CHANNELS, HN_DISCOVERY_QUERIES, REDDIT_SUBREDDITS } from "@/lib/taxonomy/sources";
+import { CURATED_CHANNELS, HN_DISCOVERY_QUERIES, REDDIT_SUBREDDITS, VERIFIED_CHANNELS } from "@/lib/taxonomy/sources";
 import { editDistance, normalize, parseYouTubeId } from "@/lib/text";
 import { getSetting } from "@/server/settings";
 import { hnCommentDiscovery, hnItemUrl, hnMentionsOf, hnYouTubeStories } from "./hn";
@@ -21,6 +21,20 @@ function plausiblyInScope(title: string, hint?: string | null): boolean {
 /* ------------------------------------------------------------------ */
 /* Sources : chaînes spécialisées (Wikidata → vérification RSS)        */
 /* ------------------------------------------------------------------ */
+
+/** Inscrit (ou met à jour) une chaîne vérifiée comme source et comme créateur suivi. Ne réactive jamais une source désactivée. */
+export async function upsertChannelSource(c: { channelId: string; title: string; universe: string | null; trust: number; official: boolean; extra?: Record<string, unknown> }) {
+  const db = await getDb();
+  const config = { channelId: c.channelId, ...(c.extra ?? {}) };
+  await db
+    .insert(sources)
+    .values({ type: "youtube_channel", name: c.title, config, universeHint: c.universe, trustLevel: c.trust, isOfficial: c.official, verifiedAt: new Date() })
+    .onConflictDoUpdate({ target: [sources.type, sources.name], set: { config, verifiedAt: new Date(), updatedAt: new Date() } });
+  await db
+    .insert(creators)
+    .values({ key: `yt:channel:${c.channelId}`, channelId: c.channelId, name: c.title, url: `https://www.youtube.com/channel/${c.channelId}`, isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust })
+    .onConflictDoUpdate({ target: creators.key, set: { isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust, updatedAt: new Date() } });
+}
 
 export async function resolveCuratedSources(log: Logger = consoleLogger) {
   const db = await getDb();
@@ -44,23 +58,20 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
       await log.warn(`Chaîne non vérifiée, ignorée : ${seed.name}`);
       continue;
     }
-    await db
-      .insert(sources)
-      .values({
-        type: "youtube_channel",
-        name: verified.title,
-        config: { channelId: verified.channelId, wikidataId: verified.wikidataId },
-        universeHint: seed.universe,
-        trustLevel: seed.trust,
-        isOfficial: seed.official ?? false,
-        verifiedAt: new Date(),
-      })
-      .onConflictDoUpdate({ target: [sources.type, sources.name], set: { config: { channelId: verified.channelId, wikidataId: verified.wikidataId }, verifiedAt: new Date(), updatedAt: new Date() } });
-    const key = `yt:channel:${verified.channelId}`;
-    await db
-      .insert(creators)
-      .values({ key, channelId: verified.channelId, name: verified.title, url: `https://www.youtube.com/channel/${verified.channelId}`, isCuratedSource: true, isOfficial: seed.official ?? false, trustLevel: seed.trust })
-      .onConflictDoUpdate({ target: creators.key, set: { isCuratedSource: true, isOfficial: seed.official ?? false, trustLevel: seed.trust, updatedAt: new Date() } });
+    await upsertChannelSource({ channelId: verified.channelId, title: verified.title, universe: seed.universe, trust: seed.trust, official: seed.official ?? false, extra: { wikidataId: verified.wikidataId } });
+    log.stat("sources_verified");
+  }
+  // Chaînes identifiées par leur identifiant (résolu via l'API YouTube), revérifiées par RSS.
+  for (const seed of VERIFIED_CHANNELS) {
+    const feed = await channelFeed(seed.channelId);
+    const a = normalize(feed?.title ?? "");
+    const b = normalize(seed.name);
+    if (!feed || !(a === b || a.includes(b) || b.includes(a) || editDistance(a, b, 3) <= 2)) {
+      log.stat("sources_unverified");
+      await log.warn(`Chaîne non vérifiée, ignorée : ${seed.name} (${seed.channelId})${feed ? ` — titre du flux : « ${feed.title} »` : ""}`);
+      continue;
+    }
+    await upsertChannelSource({ channelId: seed.channelId, title: feed.title, universe: seed.universe, trust: seed.trust, official: seed.official ?? false });
     log.stat("sources_verified");
   }
   // Requêtes HN et subreddits (configurables ensuite depuis l'administration)
@@ -80,10 +91,12 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
 /**
  * @param opts.backfillPages pages de 50 vidéos à remonter par chaîne (clé API requise)
  * @param opts.pagesByUniverse profondeur spécifique par univers indicatif (ex. { moto: 10 }) pour cibler les univers sous-représentés
+ * @param opts.channelIds limite l'exécution à ces chaînes (ex. sources tout juste ajoutées)
  */
-export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number; pagesByUniverse?: Record<string, number> } = {}) {
+export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number; pagesByUniverse?: Record<string, number>; channelIds?: string[] } = {}) {
   const db = await getDb();
-  const list = await db.select().from(sources).where(and(eq(sources.type, "youtube_channel"), eq(sources.enabled, true)));
+  const all = await db.select().from(sources).where(and(eq(sources.type, "youtube_channel"), eq(sources.enabled, true)));
+  const list = opts.channelIds?.length ? all.filter((s) => opts.channelIds!.includes(String(s.config.channelId))) : all;
   for (const src of list) {
     const channelId = String(src.config.channelId ?? "");
     try {

@@ -52,6 +52,7 @@ export default async function AboutPage() {
         </p>
         <p>
           Les vidéos dont la note atteint {scoring.thresholds.publish} avec une confiance suffisante sont publiées automatiquement. Les cas incertains (note à partir de {scoring.thresholds.review}) sont placés dans une file de validation humaine.
+          Pour préserver la diversité, une même chaîne ne peut avoir plus de {scoring.thresholds.maxAutoPublishPerChannel} vidéos publiées automatiquement sans recommandation indépendante.
           Nous distinguons toujours une vidéo <em>populaire</em>, une vidéo <em>recommandée par plusieurs sources indépendantes</em>, une vidéo <em>validée par la rédaction</em> (badge « Sélection ») et une vidéo <em>détectée automatiquement</em>.
         </p>
 

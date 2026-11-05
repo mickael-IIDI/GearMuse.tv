@@ -62,7 +62,9 @@ const BRAND_MATCHERS = BRANDS.map((b) => ({
 const MODEL_MATCHERS = MODELS.map((m) => ({ def: m, phrases: [...new Set(m.aliases.map(normalize))] }));
 
 /** Contextes de jeu vidéo ou de fiction : la vidéo ne porte pas sur un véhicule réel. */
-const GAME_CONTEXT = ["minecraft", "fortnite", "roblox", "gta", "gta v", "video game", "jeu video", "gameplay", "let s play", "speedrun", "gran turismo 7", "forza horizon", "xbox", "playstation", "nintendo", "announce trailer", "gameplay trailer", "game trailer"];
+const GAME_CONTEXT = ["minecraft", "fortnite", "roblox", "gta", "gta v", "video game", "jeu video", "gameplay", "let s play", "speedrun", "gran turismo 7", "forza horizon", "xbox", "playstation", "nintendo", "announce trailer", "gameplay trailer", "game trailer",
+  // moteurs de jeu et conférences de programmation (« Ship Comms… C++ », « Titanic… Unreal Engine 4 »)
+  "unreal engine", "unreal engine 4", "unreal engine 5", "ue4", "ue5", "unity3d", "lightning talk", "cppcon", "cppnow", "pycon", "fosdem", "strange loop"];
 const SENSATIONAL = ["you won t believe", "insane", "shocking", "gone wrong", "must see", "unbelievable", "craziest", "omg", "destroyed", "exposed", "scam", "clickbait"];
 const NEWS_MARKERS = ["live", "watch live", "replay", "news conference", "press conference", "hearing", "whistleblower", "stock", "earnings", "lawsuit", "recall", "news", "breaking", "this week", "announced", "announcement", "reveal", "revealed", "leaked", "leak", "rumor", "rumors", "actualite", "actu", "nouveaute", "update", "just dropped", "first look", "debut", "unveiled", "salon", "auto show", "motor show", "live stream", "livestream"];
 const EVERGREEN_MARKERS = ["history", "histoire", "documentary", "documentaire", "how it works", "comment ca marche", "explained", "explique", "restoration", "restauration", "lecture", "conference", "the story of", "why", "pourquoi", "how does", "engineering", "teardown", "cutaway", "tutorial", "tutoriel", "how to"];
@@ -171,7 +173,8 @@ export function classify(input: ClassifierInput): AnalysisOutput & { universeSco
     signals.add(`Source spécialisée : ${input.universeHint}`);
   }
 
-  const gameHits = GAME_CONTEXT.filter((p) => pad(titleN).includes(` ${p} `)).length;
+  const contextText = pad(`${titleN} ${normalize(input.channelName ?? "")}`);
+  const gameHits = GAME_CONTEXT.filter((p) => contextText.includes(` ${p} `)).length;
   if (gameHits) {
     for (const k of Object.keys(universeScores)) universeScores[k] *= 0.3;
     signals.add("Contexte de jeu vidéo détecté dans le titre");

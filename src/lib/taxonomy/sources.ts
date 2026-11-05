@@ -1,8 +1,8 @@
 /**
- * Sources de découverte proposées à l'amorçage. Les identifiants de chaînes ne sont
- * PAS écrits en dur : ils sont résolus via Wikidata (propriété P2397) puis vérifiés
- * par le flux RSS officiel de YouTube. Une chaîne introuvable ou non vérifiée est
- * simplement ignorée (aucun identifiant n'est inventé).
+ * Sources de découverte proposées à l'amorçage. Les identifiants de chaînes proviennent
+ * de Wikidata (propriété P2397) ou de l'API YouTube (résolution des handles) et sont
+ * toujours revérifiés par le flux RSS officiel avant inscription. Une chaîne introuvable
+ * ou dont le titre ne concorde pas est ignorée (aucun identifiant n'est inventé).
  */
 
 export type CuratedChannelSeed = {
@@ -12,6 +12,55 @@ export type CuratedChannelSeed = {
   official?: boolean;
   trust: number;
 };
+
+export type VerifiedChannelSeed = {
+  channelId: string;
+  /** Titre attendu : comparé au titre du flux RSS avant inscription. */
+  name: string;
+  universe: string;
+  official?: boolean;
+  trust: number;
+};
+
+/**
+ * Chaînes résolues par leur handle via l'API YouTube officielle (channels.list forHandle) le 5 novembre 2026,
+ * retenues après contrôle du titre, de la description et du flux RSS. Elles comblent les univers moto et
+ * nautisme, peu couverts par Wikidata. Les niveaux de confiance sont une évaluation éditoriale, ajustable
+ * depuis l'administration (Sources).
+ */
+export const VERIFIED_CHANNELS: VerifiedChannelSeed[] = [
+  // Moto
+  { channelId: "UCNSMdQtn1SuFzCZjfK2C7dQ", name: "FortNine", universe: "moto", trust: 85 },
+  { channelId: "UCdl-mzSkTtqAqed7CRNcD5Q", name: "MotoGeo", universe: "moto", trust: 70 },
+  { channelId: "UCEIs9nkveW9WmYtsOcJBwTg", name: "Itchy Boots", universe: "moto", trust: 75 },
+  { channelId: "UCLQZTXj_AnL7fDC8sLrTGMw", name: "RevZilla", universe: "moto", trust: 60 },
+  { channelId: "UCeQf8mZkzUswAL42uQs84iA", name: "WorldSBK", universe: "moto", official: true, trust: 60 },
+  { channelId: "UCdCzEBaIZQy3JXzc06ByNAg", name: "Bret Tkacs ADV", universe: "moto", trust: 75 },
+  { channelId: "UC0FFFneMi9GwRHUsuBjM0jA", name: "MotoJitsu", universe: "moto", trust: 75 },
+  { channelId: "UCkegEsZItEPQNItECCZA_pw", name: "Yammie Noob", universe: "moto", trust: 60 },
+  { channelId: "UCidMMQafCAomjuD_a3DcdHw", name: "Chaseontwowheels", universe: "moto", trust: 65 },
+  { channelId: "UChWBtAacaOja7iK_AHVWXBg", name: "MOTORRAD", universe: "moto", trust: 70 },
+  { channelId: "UCj8_8RcJRf73iO_0o1Djd-g", name: "Dirt Bike Channel", universe: "moto", trust: 65 },
+  { channelId: "UC1LDiLhhLi9oW1P8HeF1IwQ", name: "Le Repaire des Motards", universe: "moto", trust: 70 },
+  { channelId: "UC2aXNbihvVIxcG7kZu2r7KA", name: "BikeBound", universe: "moto", trust: 65 },
+  { channelId: "UCDeNRE5zcKQCwq084kzlivA", name: "American Motorcyclist Association", universe: "moto", official: true, trust: 60 },
+  // Nautisme et maritime
+  { channelId: "UCKLeLXNWfr0w2fO0h5Bt7mw", name: "BoatTEST.com", universe: "nautisme", trust: 75 },
+  { channelId: "UC5_HIscbiDZM0dMX-nCksuA", name: "Casual Navigation", universe: "nautisme", trust: 75 },
+  { channelId: "UC81BxUCw12jtyvdyv6Hxh-g", name: "Chief MAKOi", universe: "nautisme", trust: 75 },
+  { channelId: "UC__0nIHpSnvXOBVXbF8VGNg", name: "marineinsight", universe: "nautisme", trust: 70 },
+  { channelId: "UCAiDWnTP0WB1xCp6uuUo0VA", name: "Acorn To Arabella", universe: "nautisme", trust: 65 },
+  { channelId: "UCg-_lYeV8hBnDSay7nmphUA", name: "Sampson Boat Co", universe: "nautisme", trust: 75 },
+  { channelId: "UCLjcjAfNhz23WvYBmgBcK6w", name: "Sea-Doo", universe: "nautisme", official: true, trust: 60 },
+  { channelId: "UCIrW5ZZnd5oBXbvYIuXh6kg", name: "Mercury Marine", universe: "nautisme", official: true, trust: 60 },
+  { channelId: "UCalykb8yWDdpFxYm-1mNYKQ", name: "Azimut Yachts", universe: "nautisme", official: true, trust: 60 },
+  { channelId: "UC8jP6Edfm7ialPrzBzHfARg", name: "F1H2O World Championship", universe: "nautisme", official: true, trust: 60 },
+  { channelId: "UCZiaSUekMl9qG7FBn4rNZ9Q", name: "Maersk", universe: "nautisme", official: true, trust: 55 },
+  { channelId: "UCP8ZI3kj2nZkIwh8CtNB9uQ", name: "Boating Magazine", universe: "nautisme", trust: 70 },
+  { channelId: "UCFg6FgZ6xsJCYoDRpqm9J0g", name: "PowerBoat Television", universe: "nautisme", trust: 65 },
+  { channelId: "UCaO9orJHxkML8rpcKkILPIw", name: "Yachting Monthly", universe: "nautisme", trust: 60 },
+  { channelId: "UC36Hy_G_pHxIO3c2avWfLOw", name: "Motor Boat & Yachting", universe: "nautisme", trust: 75 },
+];
 
 export const CURATED_CHANNELS: CuratedChannelSeed[] = [
   // Automobile — journalisme, ingénierie, restauration

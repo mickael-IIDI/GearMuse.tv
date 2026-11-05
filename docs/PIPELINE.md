@@ -12,7 +12,7 @@ en ligne de commande (`npm run ingest -- …`), depuis l'administration (« Tâc
 | 4 | Vérification | `enrich`, `refresh_availability` | oEmbed : 200 disponible, 401/403 intégration désactivée ou privée, 404 supprimée ; API : vidéos absentes = indisponibles |
 | 5 | Analyse | `analyze` | Classifieur à règles (par défaut) ou modèle de langage : univers, sous-catégories, thèmes, formats, technologies, marques, modèles, niveau, temporalité, profondeur technique, pédagogie, intérêt historique, langue, résumé (IA) |
 | 6 | Évaluation | `score` | Note sur 100 explicable (voir ci-dessous) |
-| 7 | Publication | `score` | Seuils : publication automatique si note ≥ `publish`, confiance ≥ `minConfidence` et pertinence ≥ `minRelevance` |
+| 7 | Publication | `score` | Seuils : publication automatique si note ≥ `publish`, confiance ≥ `minConfidence` et pertinence ≥ `minRelevance` ; au plus `maxAutoPublishPerChannel` (25) vidéos par chaîne sans recommandation indépendante (les mieux notées), le surplus part en validation |
 | 8 | Contrôle | `score` + administration | Note entre `review` et `publish` → file de validation ; en dessous → rejet. Un statut fixé par un éditeur est verrouillé |
 | 9 | Actualisation | `refresh_availability`, `discover_hn_mentions` | Revérification au plus tard tous les 25 jours (règles YouTube : 30 jours max.), recherche de nouveaux recommandeurs |
 
@@ -22,7 +22,9 @@ en ligne de commande (`npm run ingest -- …`), depuis l'administration (« Tâc
   automatique des fenêtres de temps au-delà de 1 000 résultats) ; commentaires citant une vidéo (≥ 2 personnes distinctes
   pour une nouvelle vidéo) ; pour chaque vidéo du périmètre, recherche des commentaires qui la citent (recommandeurs distincts dans le temps).
 - **Chaînes spécialisées et officielles** : liste éditoriale (`src/lib/taxonomy/sources.ts`), identifiants résolus via Wikidata (P2397)
-  puis **vérifiés** par le flux RSS public de YouTube (titre concordant). Les chaînes non vérifiées sont ignorées et journalisées.
+  ou, pour `VERIFIED_CHANNELS`, par leur handle via l'API YouTube (`channels.list forHandle`, 1 unité) après contrôle humain du titre
+  et de la description ; dans tous les cas **revérifiés** par le flux RSS public de YouTube (titre concordant). Les chaînes non vérifiées
+  sont ignorées et journalisées. `discover_channels {"channelIds":[…]}` limite une remontée aux chaînes indiquées.
   Avec la clé API, `discover_channels {"backfillPages":N}` remonte les N×50 dernières vidéos de chaque chaîne, et
   `{"pagesByUniverse":{"moto":10,"nautisme":10}}` cible plus profondément les univers sous-représentés.
   Shorts (≤ 60 s, ou ≤ 3 min avec #shorts ou au moins deux mots-dièses dans le titre) et diffusions en direct

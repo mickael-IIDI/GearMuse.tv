@@ -25,6 +25,8 @@ describe("périmètre thématique", () => {
     "New Tour of the Minecraft Enterprise starship",
     "Understanding race conditions in Go",
     "Microsoft Flight Simulator - E3 2019 - Announce Trailer",
+    '"Unreal Reveal" - UNREAL ENGINE 4 TITANIC HONOR AND GLORY',
+    "Lightning Talk: Ship Comms - How do They Work? - Matt Kulukundis - C++Now 2017",
   ])("écarte les faux positifs : « %s »", (title) => {
     expect(c(title).inScope).toBe(false);
   });

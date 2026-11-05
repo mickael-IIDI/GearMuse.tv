@@ -62,7 +62,7 @@ const BRAND_MATCHERS = BRANDS.map((b) => ({
 const MODEL_MATCHERS = MODELS.map((m) => ({ def: m, phrases: [...new Set(m.aliases.map(normalize))] }));
 
 /** Contextes de jeu vidéo ou de fiction : la vidéo ne porte pas sur un véhicule réel. */
-const GAME_CONTEXT = ["minecraft", "fortnite", "roblox", "gta", "gta v", "video game", "jeu video", "gameplay", "let s play", "speedrun", "gran turismo 7", "forza horizon"];
+const GAME_CONTEXT = ["minecraft", "fortnite", "roblox", "gta", "gta v", "video game", "jeu video", "gameplay", "let s play", "speedrun", "gran turismo 7", "forza horizon", "xbox", "playstation", "nintendo", "announce trailer", "gameplay trailer", "game trailer"];
 const SENSATIONAL = ["you won t believe", "insane", "shocking", "gone wrong", "must see", "unbelievable", "craziest", "omg", "destroyed", "exposed", "scam", "clickbait"];
 const NEWS_MARKERS = ["live", "watch live", "replay", "news conference", "press conference", "hearing", "whistleblower", "stock", "earnings", "lawsuit", "recall", "news", "breaking", "this week", "announced", "announcement", "reveal", "revealed", "leaked", "leak", "rumor", "rumors", "actualite", "actu", "nouveaute", "update", "just dropped", "first look", "debut", "unveiled", "salon", "auto show", "motor show", "live stream", "livestream"];
 const EVERGREEN_MARKERS = ["history", "histoire", "documentary", "documentaire", "how it works", "comment ca marche", "explained", "explique", "restoration", "restauration", "lecture", "conference", "the story of", "why", "pourquoi", "how does", "engineering", "teardown", "cutaway", "tutorial", "tutoriel", "how to"];
@@ -179,11 +179,22 @@ export function classify(input: ClassifierInput): AnalysisOutput & { universeSco
   const ranked = Object.entries(universeScores).sort((a, b) => b[1] - a[1]);
   const [topSlug, topScore] = ranked[0];
   const IN_SCOPE_MIN = 4.5;
-  const hinted = Boolean(input.universeHint && input.universeHint === topSlug);
   const hasModel = [...modelHits.values()].some((m) => m.universe === topSlug);
-  const inScope = !gameHits && topScore >= IN_SCOPE_MIN && ((keywordScores[topSlug] ?? 0) >= 1 || hasModel || hinted);
-  if (topScore >= IN_SCOPE_MIN && !inScope) signals.add("Marque citée sans contexte véhicule : hors périmètre");
-  const relevance = toConf(topScore, 7);
+  // Ni une marque seule ni la seule thématique de la chaîne ne suffisent : il faut au moins un mot-clé véhicule.
+  const inScope = !gameHits && topScore >= IN_SCOPE_MIN && ((keywordScores[topSlug] ?? 0) >= 1 || hasModel);
+  if (topScore >= IN_SCOPE_MIN && !inScope) signals.add("Aucun mot-clé véhicule (marque ou thème de chaîne seuls) : hors périmètre");
+  // Titre « allusif » : ni le titre ni les titres de recommandation ne citent un véhicule (seuls la description,
+  // les mots-clés de l'auteur ou la chaîne le font). La pertinence est réduite : la vidéo part en validation
+  // humaine plutôt qu'en publication automatique.
+  const topDef = UNIVERSE_KWS.find((u) => u.slug === topSlug);
+  const explicitFields = [fields[0], fields[2]];
+  const explicitKw = topDef ? scoreKws(explicitFields, [...topDef.kws, ...topDef.subs.flatMap((s) => s.kws)]).score > 0 : false;
+  const explicitEntity =
+    BRAND_MATCHERS.some((bm) => brandHits.has(bm.def.slug) && bm.phrases.some((p) => explicitFields.some((f) => f.text.includes(` ${p} `)))) ||
+    MODEL_MATCHERS.some((mm) => modelHits.has(`${mm.def.brand}/${mm.def.slug}`) && mm.phrases.some((p) => explicitFields.some((f) => f.text.includes(` ${p} `))));
+  const allusive = inScope && !explicitKw && !explicitEntity;
+  if (allusive) signals.add("Titre sans référence explicite à un véhicule : pertinence réduite, validation humaine conseillée");
+  const relevance = allusive ? Math.round(toConf(topScore, 7) * 0.6 * 100) / 100 : toConf(topScore, 7);
   const selectedUniverses = inScope
     ? ranked.filter(([, s], i) => i === 0 || (s >= IN_SCOPE_MIN && s >= topScore * 0.45)).slice(0, 3)
     : [];

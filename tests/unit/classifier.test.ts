@@ -24,8 +24,23 @@ describe("périmètre thématique", () => {
     "Guy Kawasaki: The Top 10 Mistakes of Entrepreneurs",
     "New Tour of the Minecraft Enterprise starship",
     "Understanding race conditions in Go",
+    "Microsoft Flight Simulator - E3 2019 - Announce Trailer",
   ])("écarte les faux positifs : « %s »", (title) => {
     expect(c(title).inScope).toBe(false);
+  });
+
+  it("la thématique de la chaîne ne suffit pas sans mot-clé véhicule", () => {
+    expect(c("How To Study more EFFECTIVELY! Explained by CAPTAIN JOE", { universeHint: "aviation" }).inScope).toBe(false);
+  });
+
+  it("un titre sans véhicule, sauvé par la seule description, voit sa pertinence réduite (validation humaine)", () => {
+    const allusive = c("How To Study more EFFECTIVELY! Explained by CAPTAIN JOE", {
+      universeHint: "aviation",
+      description: "Airline pilot Captain Joe shares how he studied for his ATPL exams and flight training: aircraft systems, aviation theory.",
+    });
+    expect(allusive.relevance).toBeLessThan(0.55);
+    const explicit = c("How does an ALTIMETER work? Explained by CAPTAIN JOE - cockpit instruments", { universeHint: "aviation" });
+    expect(explicit.relevance).toBeGreaterThanOrEqual(0.55);
   });
 
   it("une source spécialisée suffit à confirmer un signal faible", () => {

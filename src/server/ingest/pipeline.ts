@@ -253,7 +253,7 @@ export async function enrichVideos(opts: { videoIds?: number[]; limit?: number; 
             availability: a.embeddable ? "available" : "embed_disabled",
             availabilityCheckedAt: new Date(),
             availabilityFailures: 0,
-            isShort: (a.durationSeconds ?? 999) <= 60 && /#shorts/i.test(`${a.title} ${a.description}`) ? true : undefined,
+            isShort: isLikelyShort(a.durationSeconds, a.title, a.description) ? true : undefined,
             isLive: a.liveBroadcastContent === "live" || a.liveBroadcastContent === "upcoming" || (a.durationSeconds ?? 0) > 12 * 3600,
             metadataSource: "youtube_api",
             metadataUpdatedAt: new Date(),
@@ -325,6 +325,17 @@ export async function enrichVideos(opts: { videoIds?: number[]; limit?: number; 
     },
     4,
   );
+}
+
+/**
+ * Shorts (format vertical court, jusqu'à 3 min depuis 2024) : 60 s ou moins, ou 3 min au plus avec
+ * le mot-dièse #shorts ou au moins deux mots-dièses dans le titre (motif typique des Shorts).
+ */
+export function isLikelyShort(durationSeconds: number | null, title: string, description: string): boolean {
+  if (durationSeconds == null) return false;
+  if (durationSeconds <= 60) return true;
+  if (durationSeconds > 180) return false;
+  return /#shorts?\b/i.test(`${title} ${description}`) || (title.match(/#\w+/g)?.length ?? 0) >= 2;
 }
 
 async function markUnavailable(db: DB, id: number, locked: boolean, availability: "unavailable" | "private") {

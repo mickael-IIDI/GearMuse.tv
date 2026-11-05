@@ -77,7 +77,11 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
 /* Découverte : flux RSS des chaînes suivies                           */
 /* ------------------------------------------------------------------ */
 
-export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number } = {}) {
+/**
+ * @param opts.backfillPages pages de 50 vidéos à remonter par chaîne (clé API requise)
+ * @param opts.pagesByUniverse profondeur spécifique par univers indicatif (ex. { moto: 10 }) pour cibler les univers sous-représentés
+ */
+export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number; pagesByUniverse?: Record<string, number> } = {}) {
   const db = await getDb();
   const list = await db.select().from(sources).where(and(eq(sources.type, "youtube_channel"), eq(sources.enabled, true)));
   for (const src of list) {
@@ -117,10 +121,11 @@ export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { 
         if (r.created) n++;
       }
       // Avec une clé API : remontée du catalogue complet de la chaîne (1 unité par page de 50).
-      if (youtubeApiEnabled() && (opts.backfillPages ?? 0) > 0) {
+      const pages = (src.universeHint ? opts.pagesByUniverse?.[src.universeHint] : undefined) ?? opts.backfillPages ?? 0;
+      if (youtubeApiEnabled() && pages > 0) {
         const [ch] = await apiChannels({ ids: [channelId] });
         if (ch?.uploadsPlaylistId) {
-          for (const vid of await apiPlaylistVideoIds(ch.uploadsPlaylistId, opts.backfillPages)) {
+          for (const vid of await apiPlaylistVideoIds(ch.uploadsPlaylistId, pages)) {
             const r = await registerCandidate(db, {
               externalId: vid,
               channel: { channelId, name: feed.title },

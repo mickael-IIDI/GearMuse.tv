@@ -23,7 +23,10 @@ en ligne de commande (`npm run ingest -- …`), depuis l'administration (« Tâc
   pour une nouvelle vidéo) ; pour chaque vidéo du périmètre, recherche des commentaires qui la citent (recommandeurs distincts dans le temps).
 - **Chaînes spécialisées et officielles** : liste éditoriale (`src/lib/taxonomy/sources.ts`), identifiants résolus via Wikidata (P2397)
   puis **vérifiés** par le flux RSS public de YouTube (titre concordant). Les chaînes non vérifiées sont ignorées et journalisées.
-  Avec la clé API, `discover_channels {"backfillPages":N}` remonte le catalogue complet d'une chaîne.
+  Avec la clé API, `discover_channels {"backfillPages":N}` remonte les N×50 dernières vidéos de chaque chaîne, et
+  `{"pagesByUniverse":{"moto":10,"nautisme":10}}` cible plus profondément les univers sous-représentés.
+  Shorts (≤ 60 s, ou ≤ 3 min avec #shorts ou au moins deux mots-dièses dans le titre) et diffusions en direct
+  (en cours, programmées ou de plus de 12 h) sont exclus.
 - **Reddit** : API OAuth officielle uniquement (désactivée sans identifiants).
 - **Import éditorial** et **propositions des visiteurs** (validées par un éditeur).
 
@@ -56,7 +59,10 @@ La **justification de sélection** affichée est construite uniquement à partir
 Mots-clés FR/EN normalisés par univers et sous-catégorie (préfixe `!` = fort), champs pondérés (titre ×3, mots-clés de
 l'auteur et titres de recommandation ×2, chaîne ×1,5, description ×0,6), marques et modèles (les modèles ambigus
 exigent la marque), exclusions des faux positifs (« search engine », « game engine », « race condition », « train a model »,
-contextes de jeu vidéo, homonymes comme « Guy Kawasaki »). Une marque seule ne suffit pas à entrer dans le périmètre.
+contextes de jeu vidéo et bandes-annonces, homonymes comme « Guy Kawasaki »). Ni une marque seule ni la thématique
+de la chaîne ne suffisent à entrer dans le périmètre : il faut au moins un mot-clé véhicule. Si ni le titre ni les
+titres de recommandation ne citent un véhicule (seules la description ou la chaîne le font), la pertinence est réduite
+de 40 % : la vidéo part en validation humaine plutôt qu'en publication automatique.
 Chaque décision conserve ses signaux.
 
 ### Rapprochement des chaînes sans clé API

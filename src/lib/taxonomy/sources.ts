@@ -62,6 +62,12 @@ export const VERIFIED_CHANNELS: VerifiedChannelSeed[] = [
   { channelId: "UC36Hy_G_pHxIO3c2avWfLOw", name: "Motor Boat & Yachting", universe: "nautisme", trust: 75 },
 ];
 
+/** Chaînes à ne jamais inscrire (identifiants trouvés par Wikidata mais ne correspondant pas à la source attendue). */
+export const EXCLUDED_CHANNEL_IDS: Record<string, string> = {
+  "UCNC9ca-hClRHiVv95k9QS8g": "« Airbus - Topic » : chaîne générée automatiquement par YouTube (agrégat musical), pas la chaîne officielle d'Airbus",
+  "UCYeXD06E5nIk7BwRr5Q954w": "« NASA Marathon » : marathons de speedrun de jeux vidéo, rattachée à tort à NASA par un alias Wikidata",
+};
+
 export const CURATED_CHANNELS: CuratedChannelSeed[] = [
   // Automobile — journalisme, ingénierie, restauration
   { name: "Engineering Explained", universe: "automobile", trust: 85 },

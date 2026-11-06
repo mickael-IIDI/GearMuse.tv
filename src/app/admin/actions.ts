@@ -17,6 +17,7 @@ import { hashPassword } from "@/server/auth/password";
 import { refreshCounts } from "@/server/catalog/seed";
 import { refreshSmartPlaylists, reorderPlaylist } from "@/server/catalog/playlists";
 import { importUrls, upsertChannelSource } from "@/server/ingest/discovery";
+import { applyEditorialDecisions } from "@/server/curation/decisions";
 import { JOB_TYPES, runJob, runSteps, DAILY_STEPS } from "@/server/ingest/jobs";
 import { analyzeVideos, enrichVideos, rebuildSearchText, scoreVideos } from "@/server/ingest/pipeline";
 import { channelFeed } from "@/server/ingest/youtube";
@@ -58,27 +59,10 @@ type Decision = (typeof DECISIONS)[number];
 
 async function applyDecision(ids: number[], decision: Decision, note: string | null) {
   const s = await requireAdmin("editor");
-  const db = await getDb();
-  const now = new Date();
-  for (const id of ids) {
-    const before = await db.query.videos.findFirst({ where: eq(videos.id, id), columns: { status: true, editorialPick: true, statusLocked: true, publishedOnSiteAt: true } });
-    if (!before) continue;
-    const patch: Partial<typeof videos.$inferInsert> =
-      decision === "approve"
-        ? { status: "published", statusLocked: true, statusReason: "editor: validée par la rédaction", statusChangedAt: now, publishedOnSiteAt: before.publishedOnSiteAt ?? now }
-        : decision === "reject"
-          ? { status: "rejected", statusLocked: true, statusReason: "editor: refusée par la rédaction", statusChangedAt: now }
-          : decision === "exclude"
-            ? { status: "excluded", statusLocked: true, statusReason: `editor: exclue${note ? ` — ${note}` : ""}`, statusChangedAt: now }
-            : decision === "unlock"
-              ? { statusLocked: false, needsReanalysis: true, statusReason: "editor: rendue au pipeline automatique" }
-              : decision === "feature"
-                ? { editorialPick: true }
-                : { editorialPick: false };
-    await db.update(videos).set({ ...patch, updatedAt: now }).where(eq(videos.id, id));
-    await db.insert(editorialReviews).values({ videoId: id, adminUserId: s.userId, decision: decision === "unlock" ? "edit" : decision, notes: note });
-    await audit(s, `video_${decision}`, "video", id, before, patch);
-  }
+  await applyEditorialDecisions(
+    ids.map((id) => ({ id, decision, note })),
+    { label: `editor (${s.email})`, adminUserId: s.userId, onApplied: (id, d, before, patch) => audit(s, `video_${d}`, "video", id, before, patch) },
+  );
   // Une sélection de la rédaction est une preuve enregistrée (et donc affichée) : on recalcule la note.
   if (decision === "feature" || decision === "unfeature" || decision === "approve") await scoreVideos({ videoIds: ids });
   if (decision === "unlock") {

@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, isNull, lt, notInArray, or, sql } from "drizzle-
 import { getDb } from "@/db/client";
 import { creators, importBatches, sources, videos } from "@/db/schema";
 import { classify } from "@/lib/taxonomy/classifier";
-import { CURATED_CHANNELS, HN_DISCOVERY_QUERIES, REDDIT_SUBREDDITS, VERIFIED_CHANNELS } from "@/lib/taxonomy/sources";
+import { CURATED_CHANNELS, EXCLUDED_CHANNEL_IDS, HN_DISCOVERY_QUERIES, REDDIT_SUBREDDITS, VERIFIED_CHANNELS } from "@/lib/taxonomy/sources";
 import { editDistance, normalize, parseYouTubeId } from "@/lib/text";
 import { getSetting } from "@/server/settings";
 import { hnCommentDiscovery, hnItemUrl, hnMentionsOf, hnYouTubeStories } from "./hn";
@@ -43,6 +43,10 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
     const candidates = found.get(seed.name) ?? [];
     let verified: { channelId: string; wikidataId: string; title: string } | null = null;
     for (const cand of candidates) {
+      if (EXCLUDED_CHANNEL_IDS[cand.channelId]) {
+        await log.info(`Chaîne exclue : ${EXCLUDED_CHANNEL_IDS[cand.channelId]}`);
+        continue;
+      }
       const feed = await channelFeed(cand.channelId);
       if (!feed) continue;
       const a = normalize(feed.title);

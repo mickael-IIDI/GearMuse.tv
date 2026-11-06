@@ -13,7 +13,8 @@
     "ingest": "tsx scripts/ingest.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "test": "vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "review:apply": "tsx scripts/apply-review.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",

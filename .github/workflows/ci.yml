@@ -36,7 +36,7 @@ jobs:
     needs: qualite
     runs-on: ubuntu-latest
     env:
-      ADMIN_EMAIL: e2e@vehicult.test
+      ADMIN_EMAIL: e2e@gearmuse.test
       ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD || 'e2e-mot-de-passe-local-uniquement' }}
       PW_CHANNEL: ""
     steps:

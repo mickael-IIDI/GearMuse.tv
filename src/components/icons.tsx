@@ -51,16 +51,7 @@ export const IconPlus = (p: P) => (<svg {...base(p)}><path d="M12 5v14M5 12h14" 
 export const IconEyeOff = (p: P) => (<svg {...base(p)}><path d="M3 3l18 18" /><path d="M10.6 5.1A10 10 0 0 1 12 5c5.5 0 9 7 9 7a16.5 16.5 0 0 1-3.2 4M6.6 6.6C4 8.3 3 12 3 12s3.5 7 9 7a9.6 9.6 0 0 0 5.4-1.6" /><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg>);
 export const IconTag = (p: P) => (<svg {...base(p)}><path d="M3 12V4.5A1.5 1.5 0 0 1 4.5 3H12l9 9-9 9z" /><circle cx="7.5" cy="7.5" r="1.3" /></svg>);
 
-export function Logo({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="8" fill="var(--accent)" />
-      <path d="M7 21.5a9.5 9.5 0 1 1 18 0" fill="none" stroke="var(--accent-ink)" strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M13.5 12.5v8l6.5-4z" fill="var(--accent-ink)" />
-      <path d="M16 6.8v1.8M8.6 10l1.3 1.2M23.4 10l-1.3 1.2" stroke="var(--accent-ink)" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
+export { Logo } from "./brand/logo";
 
 export const UNIVERSE_ICONS: Record<string, (p: P) => React.JSX.Element> = {
   automobile: IconCar,

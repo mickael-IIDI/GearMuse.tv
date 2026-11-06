@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
-import { Logo } from "@/components/icons";
+import { Logo, Wordmark } from "@/components/brand/logo";
 import { can, requireAdmin } from "@/server/auth/session";
 import { logoutAction } from "../actions";
 
@@ -31,7 +31,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <div className="flex items-center gap-2.5 px-5 py-4">
           <Logo size={26} />
           <div className="leading-tight">
-            <div className="font-display font-bold">{siteConfig.name}</div>
+            <Wordmark />
             <div className="text-[11px] text-faint">Administration</div>
           </div>
         </div>

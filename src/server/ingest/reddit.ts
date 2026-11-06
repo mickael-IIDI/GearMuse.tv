@@ -20,7 +20,7 @@ async function accessToken(): Promise<string> {
     headers: {
       Authorization: `Basic ${basic}`,
       "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": process.env.REDDIT_USER_AGENT || "web:vehicult-catalog:v0.1",
+      "User-Agent": process.env.REDDIT_USER_AGENT || "web:gearmuse-catalog:v0.1",
     },
   });
   const j = (await res.json()) as { access_token: string; expires_in: number };
@@ -46,7 +46,7 @@ export async function redditTopVideos(subreddit: string, period: "year" | "all" 
   const t = await accessToken();
   type Listing = { data: { children: { data: { id: string; title: string; url: string; author: string; score: number; num_comments: number; created_utc: number; permalink: string; over_18: boolean } }[] } };
   const r = await fetchJson<Listing>(`https://oauth.reddit.com/r/${encodeURIComponent(subreddit)}/top?t=${period}&limit=${limit}&raw_json=1`, {
-    headers: { Authorization: `Bearer ${t}`, "User-Agent": process.env.REDDIT_USER_AGENT || "web:vehicult-catalog:v0.1" },
+    headers: { Authorization: `Bearer ${t}`, "User-Agent": process.env.REDDIT_USER_AGENT || "web:gearmuse-catalog:v0.1" },
   });
   await recordUsage("reddit_api", { requests: 1 });
   const out: RedditPost[] = [];

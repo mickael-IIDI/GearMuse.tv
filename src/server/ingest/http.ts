@@ -1,9 +1,10 @@
 import { sql } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { apiUsage } from "@/db/schema";
+import { publicReferenceUrl, siteConfig } from "@/config/site";
 
 export const USER_AGENT =
-  process.env.INGEST_USER_AGENT || `${process.env.PROJECT_NAME || "VehiCult"}-catalog/0.1 (+${process.env.NEXT_PUBLIC_SITE_URL || "local development"})`;
+  process.env.INGEST_USER_AGENT || `${process.env.PROJECT_NAME || siteConfig.name}-catalog/0.1 (+${publicReferenceUrl}/a-propos)`;
 
 export class HttpError extends Error {
   constructor(

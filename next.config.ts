@@ -19,7 +19,24 @@ const csp = [
   "frame-ancestors 'none'",
 ].join("; ");
 
+/**
+ * Domaine canonique (même règle que resolveSiteUrl dans src/config/site.ts) :
+ * NEXT_PUBLIC_SITE_URL, sinon https://gearmuse.tv pour un build de production.
+ */
+const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || (process.env.NODE_ENV === "production" ? "https://gearmuse.tv" : "http://localhost:3000")).replace(/\/+$/, "");
+const canonicalHost = new URL(siteUrl).hostname;
+const isPublicDomain = !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(canonicalHost);
+const hostPattern = (host: string) => host.replace(/\./g, "\\.");
+
 const nextConfig: NextConfig = {
+  /**
+   * www.gearmuse.tv → gearmuse.tv (301/308). Ne s'applique qu'au domaine public ; si le domaine
+   * canonique choisi est lui-même en www, aucune redirection n'est ajoutée.
+   */
+  async redirects() {
+    if (!isPublicDomain || canonicalHost.startsWith("www.")) return [];
+    return [{ source: "/:path*", has: [{ type: "host", value: hostPattern(`www.${canonicalHost}`) }], destination: `${siteUrl}/:path*`, permanent: true }];
+  },
   // Modèle de cache classique (sans Cache Components) : rendu dynamique et cache HTTP explicite.
   serverExternalPackages: ["@electric-sql/pglite", "pg"],
   poweredByHeader: false,
@@ -41,6 +58,10 @@ const nextConfig: NextConfig = {
         ],
       },
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }, { key: "Cache-Control", value: "no-store" }] },
+      // Toute autre adresse que le domaine canonique (ex. projet.vercel.app) n'est pas indexée : pas de contenu dupliqué.
+      ...(isPublicDomain
+        ? [{ source: "/:path*", missing: [{ type: "host" as const, value: hostPattern(canonicalHost) }], headers: [{ key: "X-Robots-Tag", value: "noindex" }] }]
+        : []),
     ];
   },
 };

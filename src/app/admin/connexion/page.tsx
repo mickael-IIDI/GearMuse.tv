@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { siteConfig } from "@/config/site";
-import { Logo } from "@/components/icons";
+import { Logo, Wordmark } from "@/components/brand/logo";
 import { ActionForm } from "@/components/admin/form-state";
 import { input } from "@/components/admin/ui";
 import { getSession } from "@/server/auth/session";
@@ -17,7 +16,7 @@ export default async function LoginPage() {
         <div className="mb-6 flex items-center gap-3">
           <Logo size={32} />
           <div>
-            <div className="font-display text-lg font-bold">{siteConfig.name}</div>
+            <Wordmark className="block text-lg" />
             <div className="text-xs text-muted">Administration</div>
           </div>
         </div>

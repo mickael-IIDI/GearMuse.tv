@@ -12,7 +12,7 @@ export default function LegalPage() {
       <div className="prose-text text-[15px] leading-7 text-fg/90">
         <h2>Éditeur</h2>
         <p>
-          Site : {siteConfig.name} — {siteConfig.url}
+          Site : {siteConfig.name} — <a href={siteConfig.url}>{siteConfig.domain}</a>
           <br />
           Éditeur : {siteConfig.publisher || missing}
           <br />

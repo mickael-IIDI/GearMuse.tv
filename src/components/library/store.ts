@@ -134,11 +134,12 @@ export const library = {
     save({ ...s, seed: Math.floor(Math.random() * 1e6) });
   },
   exportJson(): string {
-    return JSON.stringify({ format: "vehicult-library", version: 1, exportedAt: new Date().toISOString(), data: library.get() }, null, 2);
+    return JSON.stringify({ format: "gearmuse-library", version: 1, exportedAt: new Date().toISOString(), data: library.get() }, null, 2);
   },
   importJson(text: string) {
     const parsed = JSON.parse(text) as { format?: string; data?: Partial<LibraryState> };
-    if (parsed.format !== "vehicult-library" || !parsed.data) throw new Error("format");
+    // « vehicult-library » : exports réalisés avant l'adoption du nom GearMuse.
+    if (!parsed.data || (parsed.format !== "gearmuse-library" && parsed.format !== "vehicult-library")) throw new Error("format");
     save(sanitize(parsed.data));
   },
 };

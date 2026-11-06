@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import { siteConfig } from "@/config/site";
+import { Wordmark } from "@/components/brand/logo";
 import { useI18n } from "@/components/locale-provider";
 import { setUiCookie } from "@/components/library/store";
 import {
@@ -113,8 +114,8 @@ export function Shell({ children, theme }: { children: React.ReactNode; theme: "
           <IconMenu />
         </button>
         <Link href="/" className="flex shrink-0 items-center gap-2 pr-2" aria-label={`${siteConfig.name} — ${t.nav.home}`}>
-          <Logo size={28} />
-          <span className="hidden font-display text-[19px] font-bold tracking-tight sm:inline">{siteConfig.name}</span>
+          <Logo size={30} />
+          <Wordmark className="hidden text-[20px] sm:inline" />
         </Link>
         <div className="mx-auto w-full max-w-[640px] min-w-0">
           <SearchBox />

@@ -13,7 +13,7 @@ export function clientIp(req: Request): string {
 }
 
 export function ipHash(req: Request): string {
-  const salt = process.env.IP_HASH_SALT || process.env.SESSION_SECRET || "vehicult";
+  const salt = process.env.IP_HASH_SALT || process.env.SESSION_SECRET || "gearmuse";
   return createHash("sha256").update(`${salt}:${clientIp(req)}`).digest("hex").slice(0, 32);
 }
 

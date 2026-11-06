@@ -1,10 +1,10 @@
-# VehiCult (nom provisoire — variable `PROJECT_NAME`)
+# GearMuse — [gearmuse.tv](https://gearmuse.tv)
 
 Médiathèque vidéo de référence pour les passionnés de **véhicules motorisés** : automobile, moto, aviation, bateaux, trains, engins, fusées.
 Les vidéos (YouTube) sont **identifiées, vérifiées, classées, notées et recommandées** ; elles ne sont pas hébergées.
 Ergonomie inspirée de [HackerTube](https://hackertube.org/) (Andrej Karpathy), identité visuelle et code originaux.
 
-> État détaillé (terminé / testé / restant) : [docs/ETAT.md](docs/ETAT.md)
+> État détaillé (terminé / testé / restant) : [docs/ETAT.md](docs/ETAT.md) · Identité visuelle : [docs/MARQUE.md](docs/MARQUE.md) · Mise en production : [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md)
 
 ## Démarrage rapide (local, sans aucun service externe)
 
@@ -31,6 +31,8 @@ npm run dev                        # http://localhost:3000
 | `npm run ingest -- import <url…>` | Import manuel d'URL YouTube |
 | `npm run ingest -- stats` | État du catalogue |
 | `npm run admin:create -- <email> <rôle>` | Créer / modifier un administrateur (`ADMIN_PASSWORD` en variable) |
+| `npm run review:apply` | Appliquer une revue éditoriale (fichiers de décisions, voir docs/REVUE-EDITORIALE.md) |
+| `npm run brand:generate` | Régénérer le symbole, les icônes, l'image de partage et le kit de marque (voir docs/MARQUE.md) |
 | `npm run lint` / `typecheck` / `test` / `test:e2e` | Qualité : ESLint, TypeScript strict, Vitest, Playwright |
 
 ## Architecture en bref

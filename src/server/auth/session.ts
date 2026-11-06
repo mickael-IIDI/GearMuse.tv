@@ -24,7 +24,7 @@ const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 async function requestMeta() {
   const h = await headers();
   const ip = (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "local").trim();
-  const salt = process.env.IP_HASH_SALT || process.env.SESSION_SECRET || "vehicult";
+  const salt = process.env.IP_HASH_SALT || process.env.SESSION_SECRET || "gearmuse";
   return { ipHash: sha(`${salt}:${ip}`).slice(0, 32), userAgent: (h.get("user-agent") ?? "").slice(0, 300) };
 }
 

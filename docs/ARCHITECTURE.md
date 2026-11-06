@@ -25,7 +25,7 @@ src/
   app/(site)/…           pages publiques (accueil, univers, vidéo, recherche, playlists, bibliothèque…)
   app/admin/…            back-office (connexion, (panel)/… protégées, actions.ts = actions serveur)
   app/api/…              videos, suggest, recommandations, contributions, cron/[task], health
-  components/            shell, cartes, filtres, lecteur, bibliothèque locale, admin
+  components/            shell, marque (symbole, logotype), cartes, filtres, lecteur, bibliothèque locale, admin
   config/site.ts         nom, URL, contact (variables d'environnement)
   db/schema.ts           schéma Drizzle (30 tables) ; client.ts (PGlite / pg) ; migrate.ts
   lib/                   texte, filtres, i18n, synonymes, taxonomie (données, marques, classifieur, sources)
@@ -37,7 +37,7 @@ src/
     recommend.ts         moteur « Pour vous »
     auth/                mots de passe scrypt, sessions, amorçage du premier compte
     security/            limitation de débit
-scripts/                 db-migrate, ingest (CLI), create-admin
+scripts/                 db-migrate, ingest (CLI), create-admin, apply-review, brand/ (identité visuelle)
 tests/unit, tests/e2e    Vitest, Playwright
 drizzle/                 migrations SQL générées
 ```

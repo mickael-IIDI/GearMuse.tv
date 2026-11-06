@@ -67,8 +67,37 @@ export default async function HomePage() {
   const exploreSub = subs.length ? subs[seed % subs.length] : null;
   const explore = exploreSub ? await pick({ sous: exploreSub.slug }, "qualite", 4) : [];
 
+  // Identité du site pour les moteurs de recherche : nom, logo et recherche interne.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteConfig.url}/#organization`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        logo: { "@type": "ImageObject", url: `${siteConfig.url}/brand/icon-512.png`, width: 512, height: 512 },
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteConfig.url}/#website`,
+        name: siteConfig.name,
+        url: siteConfig.url,
+        description: siteConfig.tagline,
+        inLanguage: ["fr", "en"],
+        publisher: { "@id": `${siteConfig.url}/#organization` },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: { "@type": "EntryPoint", urlTemplate: `${siteConfig.url}/recherche?q={search_term_string}` },
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <section className="relative mb-10 overflow-hidden rounded-3xl border border-line bg-elev px-6 py-8 sm:px-10 sm:py-10">
         <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full bg-accent/15 blur-3xl" />
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{siteConfig.name}</p>

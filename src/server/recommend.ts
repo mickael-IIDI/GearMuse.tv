@@ -25,6 +25,7 @@ export const ProfileSchema = z.object({
   seed: z.number().int().min(0).max(1e9).default(0),
   page: z.number().int().min(1).max(20).default(1),
   locale: z.enum(["fr", "en"]).default("fr"),
+  language: z.string().regex(/^[a-z]{2,3}$/).optional(),
 });
 export type Profile = z.infer<typeof ProfileSchema>;
 
@@ -155,7 +156,7 @@ export async function recommend(p: Profile): Promise<{ items: VideoCard[]; perso
       (select coalesce(json_agg(x), '[]'::json) from (select s.slug, s.labels, pc.slug as universe from video_subcategories vs join subcategories s on s.id = vs.subcategory_id join categories pc on pc.id = s.category_id where vs.video_id = v.id order by vs.confidence desc limit 2) x) as subs,
       agg.s as sim, agg.top
     from agg join videos v on v.id = agg.vid left join creators cr on cr.id = v.creator_id
-    where v.status = 'published'
+    where v.status = 'published'${p.language ? sql` and v.language = ${p.language}` : sql``}
     order by agg.s desc limit 400`);
   const cands = rows<Record<string, unknown>>(res).filter((r) => !seenIds.has(String(r.external_id)));
   const maxSim = Math.max(1, ...cands.map((r) => Number(r.sim)));
@@ -201,7 +202,7 @@ export async function recommend(p: Profile): Promise<{ items: VideoCard[]; perso
   const exploreSlots = PAGE - picked.length;
   for (let i = 0; i < exploreSlots && explore.length; i++) {
     const u = explore[i % explore.length];
-    const list = await listVideos({ filters: { univers: u }, sort: "qualite", pageSize: 12, seed: p.seed + p.page + i });
+    const list = await listVideos({ filters: { univers: u, langue: p.language }, sort: "qualite", pageSize: 12, seed: p.seed + p.page + i });
     const choice = list.items.find((x) => !pickedIds.has(x.id) && !seenIds.has(x.externalId));
     if (!choice) continue;
     pickedIds.add(choice.id);
@@ -216,7 +217,7 @@ async function coldStart(p: Profile, seen: Set<string>): Promise<VideoCard[]> {
   const en = p.locale === "en";
   const seed = p.seed + p.page * 7;
   const take = async (label: string, opts: Parameters<typeof listVideos>[0], n: number) => {
-    const r = await listVideos({ ...opts, pageSize: n * 3, seed });
+    const r = await listVideos({ ...opts, filters: { ...opts.filters, langue: p.language }, pageSize: n * 3, seed });
     return r.items.filter((x) => !seen.has(x.externalId)).slice(0, n).map((x) => ({ ...x, reason: label }));
   };
   const parts = await Promise.all([

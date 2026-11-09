@@ -17,9 +17,11 @@ export type VerifiedChannelSeed = {
   channelId: string;
   /** Titre attendu : comparé au titre du flux RSS avant inscription. */
   name: string;
-  universe: string;
+  universe: string | null;
   official?: boolean;
   trust: number;
+  /** Langue des vidéos de la chaîne, appliquée quand YouTube n'en déclare aucune. */
+  language?: string;
 };
 
 /**
@@ -64,6 +66,7 @@ export const VERIFIED_CHANNELS: VerifiedChannelSeed[] = [
 
 /** Chaînes à ne jamais inscrire (identifiants trouvés par Wikidata mais ne correspondant pas à la source attendue). */
 export const EXCLUDED_CHANNEL_IDS: Record<string, string> = {
+  "UCHvGDVSW3ZIPjn8nUXU6IAQ": "« La French Drive » : annonces de modèles fictifs présentées comme réelles",
   "UCNC9ca-hClRHiVv95k9QS8g": "« Airbus - Topic » : chaîne générée automatiquement par YouTube (agrégat musical), pas la chaîne officielle d'Airbus",
   "UCYeXD06E5nIk7BwRr5Q954w": "« NASA Marathon » : marathons de speedrun de jeux vidéo, rattachée à tort à NASA par un alias Wikidata",
 };

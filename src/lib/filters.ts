@@ -3,6 +3,8 @@
  * Partagé entre le serveur (requêtes) et le client (barre de filtres).
  */
 
+import { isLanguageCode } from "./languages";
+
 export const FILTER_GROUPS = {
   date: [
     ["semaine", "Dernière semaine", "Past week"],
@@ -38,11 +40,6 @@ export const FILTER_GROUPS = {
     ["hydrogene", "Hydrogène", "Hydrogen"],
     ["vapeur", "Vapeur", "Steam"],
     ["propulsion-speciale", "Propulsion spéciale", "Special propulsion"],
-  ],
-  langue: [
-    ["fr", "Français", "French"],
-    ["en", "Anglais", "English"],
-    ["autre", "Autres langues", "Other languages"],
   ],
   qualite: [
     ["pepites", "Pépites méconnues", "Hidden gems"],
@@ -101,6 +98,9 @@ export function parseFilters(sp: SP): { filters: VideoFilters; sort?: SortKey; p
     const v = get(sp, key);
     if (v && SLUG.test(v)) filters[key] = v;
   }
+  // La langue vient de la préférence du visiteur (cookie) ; elle ne passe par l'URL que pour le chargement progressif.
+  const langue = get(sp, "langue");
+  if (isLanguageCode(langue)) filters.langue = langue;
   const ch = Number(get(sp, "chaine"));
   if (Number.isInteger(ch) && ch > 0) filters.chaine = ch;
   const s = get(sp, "tri");

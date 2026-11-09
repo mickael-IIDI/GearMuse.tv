@@ -7,7 +7,9 @@ import { useI18n } from "@/components/locale-provider";
 import { useHydrated } from "@/components/use-hydrated";
 import { fetchRecommendations } from "@/components/video/for-you-section";
 import { VideoCard } from "@/components/video/video-card";
-import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState, PageHeader } from "@/components/ui/page-header";
+import { LanguagePicker, LanguageResetButton } from "@/components/video-language/picker";
+import { useVideoLanguage } from "@/components/video-language/provider";
 import { IconEyeOff } from "@/components/icons";
 import type { VideoCard as Card } from "@/server/queries/videos";
 
@@ -17,20 +19,21 @@ export function ForYouFeed() {
   const { t, locale } = useI18n();
   const lib = useLibrary();
   const hydrated = useHydrated();
-  const key = `${locale}|${lib.seed}|${lib.prefs.universes.join(",")}|${lib.prefs.formats.join(",")}|${lib.favorites.length}`;
+  const { current: language } = useVideoLanguage();
+  const key = `${locale}|${language ?? ""}|${lib.seed}|${lib.prefs.universes.join(",")}|${lib.prefs.formats.join(",")}|${lib.favorites.length}`;
   const [feed, setFeed] = useState<Feed | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
     let cancelled = false;
-    fetchRecommendations(library.get(), locale, 1)
+    fetchRecommendations(library.get(), locale, 1, language)
       .then((r) => !cancelled && setFeed({ key, items: r.items, personalized: r.personalized, page: 1 }))
       .catch(() => !cancelled && setFeed({ key, items: [], personalized: true, page: 1 }));
     return () => {
       cancelled = true;
     };
-  }, [hydrated, key, locale]);
+  }, [hydrated, key, locale, language]);
 
   const current = feed?.key === key ? feed : null;
   const loading = !current || loadingMore;
@@ -39,7 +42,7 @@ export function ForYouFeed() {
     if (!current) return;
     setLoadingMore(true);
     try {
-      const r = await fetchRecommendations(library.get(), locale, current.page + 1);
+      const r = await fetchRecommendations(library.get(), locale, current.page + 1, language);
       setFeed((f) => (f && f.key === key ? { ...f, page: f.page + 1, items: [...f.items, ...r.items.filter((x) => !f.items.some((y) => y.id === x.id))] } : f));
     } finally {
       setLoadingMore(false);
@@ -49,12 +52,21 @@ export function ForYouFeed() {
   const visible = (current?.items ?? []).filter((v) => !lib.hidden.includes(v.externalId));
   return (
     <>
-      <PageHeader title={t.forYou.title} subtitle={t.forYou.intro} />
+      <PageHeader title={t.forYou.title} subtitle={t.forYou.intro}>
+        <div className="mt-3">
+          <LanguagePicker />
+        </div>
+      </PageHeader>
       {current && !current.personalized && (
         <p className="mb-6 rounded-xl border border-line bg-elev px-4 py-3 text-sm text-muted">
           {t.forYou.coldStart}{" "}
           <Link href="/parametres" className="text-link underline">{t.nav.settings}</Link>
         </p>
+      )}
+      {current && language && !visible.length && (
+        <EmptyState title={t.videoLanguage.empty}>
+          <LanguageResetButton />
+        </EmptyState>
       )}
       <div className="video-grid">
         {visible.map((v) => (

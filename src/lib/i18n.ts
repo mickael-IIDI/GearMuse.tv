@@ -50,7 +50,6 @@ const fr = {
     duree: "Durée",
     format: "Format",
     techno: "Technologie",
-    langue: "Langue",
     qualite: "Sélection",
     tri: "Trier par",
     clear: "Tout effacer",
@@ -161,13 +160,19 @@ const fr = {
     privacy: "Toutes ces préférences restent dans votre navigateur (stockage local). Rien n'est envoyé à nos serveurs, sauf de façon anonyme et ponctuelle pour calculer vos recommandations.",
     saved: "Enregistré",
   },
+  videoLanguage: {
+    label: "Langue des vidéos",
+    all: "Toutes les langues",
+    hint: "S'applique à l'accueil et à toutes les listes de vidéos, sur ce navigateur.",
+    empty: "Aucune vidéo dans cette langue ici",
+    showAll: "Voir toutes les langues",
+  },
   common: {
     loadMore: "Charger plus",
     loading: "Chargement…",
     back: "Retour",
     videos: (n: number) => `${n.toLocaleString("fr-FR")} vidéo${n > 1 ? "s" : ""}`,
     minutes: (m: number) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`),
-    playAll: "Tout lire sur YouTube",
     none: "Rien à afficher pour l'instant.",
     error: "Une erreur est survenue.",
     notFound: "Page introuvable",
@@ -191,7 +196,7 @@ const en: Dict = {
     videos: "Videos",
     shortcut: "Shortcut: / key",
   },
-  filters: { button: "Filters", date: "Upload date", duree: "Duration", format: "Format", techno: "Technology", langue: "Language", qualite: "Selection", tri: "Sort by", clear: "Clear all", empty: "No videos match these filters.", durationNotice: (pct) => `Duration is known for ${pct}% of the catalog: duration filters only apply to those videos.` },
+  filters: { button: "Filters", date: "Upload date", duree: "Duration", format: "Format", techno: "Technology", qualite: "Selection", tri: "Sort by", clear: "Clear all", empty: "No videos match these filters.", durationNotice: (pct) => `Duration is known for ${pct}% of the catalog: duration filters only apply to those videos.` },
   card: { later: "Watch later", laterSaved: "Saved for later", favorite: "Add to favorites", favoriteSaved: "In your favorites", editorial: "Pick", gem: "Gem", score: "Score", scoreHelp: "Internal quality score out of 100, computed by our selection algorithm (see About).", recommenders: (n) => `${n} recommender${n > 1 ? "s" : ""}`, unavailable: "Unavailable", views: (n) => `${new Intl.NumberFormat("en", { notation: "compact" }).format(n)} views` },
   video: {
     watchOnYoutube: "Watch on YouTube", share: "Share", copied: "Link copied", channel: "View channel", summary: "Editorial summary", summaryAi: "Automatically generated from public metadata; verifiable on YouTube.", whySelected: "Why this video was selected", evidence: "Recommendations behind the selection", description: "Author's description", related: "Related videos", sameModel: (l) => `More about: ${l}`, scoreDetails: "Score details", notMeasured: "not measurable", playerConsent: "Playing loads YouTube's official player (Google), subject to its own privacy rules.", play: "Play video", embedDisabled: "The author has disabled embedded playback for this video.", unavailable: "This video is no longer available on YouTube (deleted, private or blocked).", playbackError: "Embedded playback failed (blocked in your region, removed or restricted).", showMore: "Show more", showLess: "Show less", published: "Published", unknownDate: "unknown upload date", tags: "Keywords",
@@ -203,7 +208,8 @@ const en: Dict = {
   library: { favoritesTitle: "Your favorites", historyTitle: "History", laterTitle: "Watch later", emptyFavorites: "No favorites yet. Use the heart on a video to add it.", emptyHistory: "No videos watched yet.", emptyLater: "Nothing saved for later. Use the clock on a thumbnail.", historyPaused: "History is paused (see Settings).", clearHistory: "Clear history", localNotice: "These lists are stored only in this browser. No account needed.", remove: "Remove", loading: "Loading…" },
   forYou: { title: "For you", intro: "Recommendations computed from your favorites, history and preferences, stored only in this browser.", coldStart: "No history yet: here is a starter selection. Add favorites or pick universes in Settings to personalise this feed.", more: "More recommendations", hide: "Don't suggest again" },
   settings: { title: "Settings", theme: "Theme", dark: "Dark", light: "Light", system: "System", language: "Interface language", universes: "Favorite universes", formats: "Preferred content types", duration: "Preferred duration", any: "Any", history: "History", historyEnabled: "Record watched videos", clearHistory: "Clear history", resetReco: "Reset recommendations", resetDone: "Recommendations reset.", player: "Video player", autoLoad: "Load the YouTube player without a prior click", export: "Export my local data", import: "Import a file", importDone: "Data imported.", importError: "Invalid file.", privacy: "All these preferences stay in your browser (local storage). Nothing is sent to our servers, except anonymously and on the fly to compute your recommendations.", saved: "Saved" },
-  common: { loadMore: "Load more", loading: "Loading…", back: "Back", videos: (n) => `${n.toLocaleString("en")} video${n > 1 ? "s" : ""}`, minutes: (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`), playAll: "Play all on YouTube", none: "Nothing to show yet.", error: "Something went wrong.", notFound: "Page not found", notFoundText: "This page does not exist or is no longer available." },
+  videoLanguage: { label: "Video language", all: "All languages", hint: "Applies to the home page and every video list, in this browser.", empty: "No videos in this language here", showAll: "Show all languages" },
+  common: { loadMore: "Load more", loading: "Loading…", back: "Back", videos: (n) => `${n.toLocaleString("en")} video${n > 1 ? "s" : ""}`, minutes: (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`), none: "Nothing to show yet.", error: "Something went wrong.", notFound: "Page not found", notFoundText: "This page does not exist or is no longer available." },
 };
 
 export const dictionaries: Record<Locale, Dict> = { fr, en };

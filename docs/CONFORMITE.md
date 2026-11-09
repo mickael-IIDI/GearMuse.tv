@@ -28,7 +28,7 @@ Analyse :
 ## RGPD
 
 - Pas de compte visiteur, pas de traceur publicitaire ni de mesure d'audience tierce : aucun bandeau de consentement requis.
-- Préférences et bibliothèque en stockage local (fonctionnalités demandées par l'utilisateur, exemptées de consentement).
+- Préférences et bibliothèque en stockage local, et trois cookies d'interface posés à la demande du visiteur : thème, langue de l'interface, langue des vidéos (fonctionnalités demandées par l'utilisateur, exemptées de consentement).
 - Lecteur YouTube chargé uniquement à l'action de l'utilisateur (ou s'il l'a choisi dans les paramètres) ; mention affichée sur la façade.
 - Profil de recommandation traité à la volée, ni stocké ni journalisé.
 - Formulaires : données minimales, empreinte non réversible de l'adresse IP (anti-abus), conservation limitée (12 mois, à appliquer par une purge planifiée — voir ETAT.md).

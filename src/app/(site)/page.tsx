@@ -7,9 +7,11 @@ import { VideoCard } from "@/components/video/video-card";
 import { ForYouSection } from "@/components/video/for-you-section";
 import { EmptyState } from "@/components/ui/page-header";
 import { label } from "@/lib/i18n";
-import { getI18n } from "@/server/locale";
+import { getI18n, getVideoLanguage } from "@/server/locale";
 import { universes } from "@/server/queries/catalog";
-import { catalogCounts, listVideos, type VideoCard as Card } from "@/server/queries/videos";
+import { catalogCounts, listVideos, publishedLanguages, type VideoCard as Card } from "@/server/queries/videos";
+import { LanguagePicker, LanguageResetButton } from "@/components/video-language/picker";
+import { languageLabel } from "@/lib/languages";
 import type { VideoFilters, SortKey } from "@/lib/filters";
 
 const daySeed = () => Math.floor(Date.now() / 86400000);
@@ -40,10 +42,11 @@ export default async function HomePage() {
   const { t, locale } = await getI18n();
   const en = locale === "en";
   const seed = daySeed();
-  const [counts, unis] = await Promise.all([catalogCounts(), universes()]);
+  const [counts, unis, language, { languages }] = await Promise.all([catalogCounts(), universes(), getVideoLanguage(), publishedLanguages()]);
+  const languageCount = language ? (languages.find((l) => l.code === language)?.count ?? 0) : null;
   const shown = new Set<number>();
   const pick = async (filters: VideoFilters, sort: SortKey | undefined, n = 8, useSeed = false) => {
-    const r = await listVideos({ filters, sort, pageSize: n + 12, seed: useSeed ? seed : undefined });
+    const r = await listVideos({ filters: { ...filters, langue: language }, sort, pageSize: n + 12, seed: useSeed ? seed : undefined });
     const out = r.items.filter((v) => !shown.has(v.id)).slice(0, n);
     out.forEach((v) => shown.add(v.id));
     return out;
@@ -104,17 +107,21 @@ export default async function HomePage() {
         <h1 className="mt-2 max-w-3xl font-display text-[28px] font-bold leading-[1.15] tracking-tight sm:text-[38px]">{t.home.hero}</h1>
         <p className="mt-3 max-w-2xl text-[15.5px] text-muted">{t.home.heroSub}</p>
         <p className="mt-4 text-sm text-faint">
-          {t.home.stats(counts.published)}
-          {counts.pending > 0 && <> · {en ? `${counts.pending.toLocaleString("en")} awaiting editorial review` : `${counts.pending.toLocaleString("fr-FR")} en attente de validation éditoriale`}</>}
+          {language && <>{languageLabel(language, locale)} · </>}
+          {t.home.stats(languageCount ?? counts.published)}
+          {!language && counts.pending > 0 && <> · {en ? `${counts.pending.toLocaleString("en")} awaiting editorial review` : `${counts.pending.toLocaleString("fr-FR")} en attente de validation éditoriale`}</>}
         </p>
-        <nav aria-label={t.nav.universes} className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-5">
+          <LanguagePicker size="lg" />
+        </div>
+        <nav aria-label={t.nav.universes} className="mt-4 flex flex-wrap gap-2">
           {unis.map((u) => {
             const Icon = UNIVERSE_ICONS[u.slug];
             return (
               <Link key={u.slug} href={`/univers/${u.slug}`} className="inline-flex items-center gap-2 rounded-full border border-line bg-bg/60 px-4 py-2 text-sm font-medium hover:border-accent hover:text-accent">
                 {Icon && <Icon size={18} />}
                 {label(u.labels, locale)}
-                <span className="text-xs text-faint">{u.videoCount}</span>
+                {!language && <span className="text-xs text-faint">{u.videoCount}</span>}
               </Link>
             );
           })}
@@ -122,6 +129,11 @@ export default async function HomePage() {
       </section>
 
       {!counts.published && <EmptyState title={t.home.empty} />}
+      {counts.published > 0 && !moment.length && language && (
+        <EmptyState title={t.videoLanguage.empty}>
+          <LanguageResetButton />
+        </EmptyState>
+      )}
 
       <Section title={t.home.moment} href="/videos" items={moment} locale={locale} seeAll={t.home.seeAll} />
       <ForYouSection />

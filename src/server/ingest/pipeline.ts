@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, ne, notInArray, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, ne, notInArray, or, sql, isNotNull } from "drizzle-orm";
 import { getDb, type DB } from "@/db/client";
 import {
   aiAnalysis,
@@ -20,7 +20,7 @@ import {
   type SourceType,
 } from "@/db/schema";
 import { classify, HEURISTIC_VERSION } from "@/lib/taxonomy/classifier";
-import { guessLanguage, normalize, videoSlug } from "@/lib/text";
+import { guessLanguage, looksEnglish, normalize, videoSlug } from "@/lib/text";
 import { categoryIdMaps } from "@/server/catalog/seed";
 import { buildSelectionReason, computeScore, decideStatus, type EvidenceLite } from "@/server/curation/score";
 import { getSetting } from "@/server/settings";
@@ -381,6 +381,7 @@ export async function analyzeVideos(opts: { videoIds?: number[]; limit?: number;
     ? inArray(videos.id, opts.videoIds)
     : and(opts.force ? undefined : eq(videos.needsReanalysis, true), ne(videos.title, ""), notInArray(videos.status, ["excluded", "unavailable"]));
   const list = await db.select().from(videos).where(where).limit(opts.limit ?? 5000);
+  const channelLanguages = new Map((await db.select({ id: creators.id, language: creators.language }).from(creators).where(isNotNull(creators.language))).map((c) => [c.id, c.language as string]));
   const useAi = await aiEnabled();
   log.info(`Analyse de ${list.length} vidéo(s) (${useAi ? "modèle de langage" : HEURISTIC_VERSION})`);
 
@@ -434,7 +435,10 @@ export async function analyzeVideos(opts: { videoIds?: number[]; limit?: number;
       durationMs: Date.now() - started,
     });
     await applyAssignments(db, v.id, output, meta.provider === "heuristic" ? "heuristic" : "ai", maps, tagCache);
-    const lang = v.languageSource === "api" || v.languageSource === "editor" ? undefined : output.language ?? guessLanguage(v.title) ?? undefined;
+    // Priorité : éditeur, langue déclarée à YouTube (sauf « fr » contredit par un titre anglais, réglage par défaut du compte), langue de la chaîne, langue devinée.
+    const channelLanguage = v.creatorId ? channelLanguages.get(v.creatorId) : undefined;
+    const declaredLanguageHolds = v.languageSource === "editor" || (v.languageSource === "api" && !(v.language === "fr" && looksEnglish(v.title)));
+    const lang = declaredLanguageHolds ? undefined : channelLanguage && !looksEnglish(v.title) ? channelLanguage : output.language ?? guessLanguage(v.title) ?? undefined;
     await db
       .update(videos)
       .set({
@@ -538,7 +542,7 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
   const scoring = await getSetting("scoring");
   const ingestion = await getSetting("ingestion");
   const where = opts.videoIds?.length ? inArray(videos.id, opts.videoIds) : and(ne(videos.title, ""), eq(videos.needsReanalysis, false), notInArray(videos.status, ["excluded"]));
-  const list = await db.select().from(videos).where(where).limit(opts.limit ?? 20000);
+  const list = await db.select().from(videos).where(where).limit(opts.limit ?? 100000);
   log.info(`Notation de ${list.length} vidéo(s)`);
   for (const v of list) {
     const analysisRow = await db.query.aiAnalysis.findFirst({ where: and(eq(aiAnalysis.videoId, v.id), isNull(aiAnalysis.error)), orderBy: desc(aiAnalysis.createdAt) });

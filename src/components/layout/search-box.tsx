@@ -66,7 +66,7 @@ export function SearchBox() {
     inputRef.current?.blur();
     // Conserve les filtres actifs d'une page de liste (comme sur HackerTube).
     const keep = new URLSearchParams();
-    for (const k of ["date", "duree", "format", "techno", "langue", "qualite", "univers"]) {
+    for (const k of ["date", "duree", "format", "techno", "qualite", "univers"]) {
       const v = params.get(k);
       if (v) keep.set(k, v);
     }

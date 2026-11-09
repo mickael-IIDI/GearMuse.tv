@@ -4,23 +4,22 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { FILTER_GROUPS, SORTS, type FilterKey } from "@/lib/filters";
 import { useI18n } from "@/components/locale-provider";
-import { IconFilter, IconX, IconExternal } from "@/components/icons";
+import { IconFilter, IconX } from "@/components/icons";
+import { LanguagePicker } from "@/components/video-language/picker";
 
 /**
  * Barre de filtres façon panneau YouTube : un choix par groupe, combinables,
  * conservés dans l'URL (partageable). Cliquer sur l'option active la retire.
  */
 export function FilterBar({
-  groups = ["date", "duree", "format", "techno", "langue", "qualite"],
+  groups = ["date", "duree", "format", "techno", "qualite"],
   search = false,
   durationKnownPct,
-  playAllIds,
   locked = [],
 }: {
   groups?: FilterKey[];
   search?: boolean;
   durationKnownPct?: number;
-  playAllIds?: string[];
   /** Paramètres fixés par la page (ex. durée pour « Vidéos longues ») : non modifiables ici. */
   locked?: string[];
 }) {
@@ -48,6 +47,7 @@ export function FilterBar({
   return (
     <div className="mb-5">
       <div className="flex flex-wrap items-center gap-2">
+        <LanguagePicker />
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -76,20 +76,10 @@ export function FilterBar({
             {t.filters.clear}
           </button>
         )}
-        {playAllIds && playAllIds.length > 1 && (
-          <a
-            href={`https://www.youtube.com/watch_videos?video_ids=${playAllIds.slice(0, 50).join(",")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto inline-flex h-9 items-center gap-2 rounded-full border border-line px-4 text-sm hover:bg-hover"
-          >
-            {t.common.playAll} <IconExternal size={15} />
-          </a>
-        )}
       </div>
 
       {open && (
-        <div className="mt-3 grid gap-x-6 gap-y-4 rounded-xl border border-line bg-elev p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+        <div className="mt-3 grid gap-x-6 gap-y-4 rounded-xl border border-line bg-elev p-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
           {groups.filter((g) => !locked.includes(g)).map((g) => (
             <fieldset key={g} className="min-w-0">
               <legend className="mb-2 border-b border-line pb-2 text-xs font-semibold uppercase tracking-wide text-faint">{groupLabel(g)}</legend>

@@ -270,6 +270,24 @@ export async function apiPlaylistVideoIds(playlistId: string, maxPages = 4): Pro
 }
 
 /** search.list — 100 unités ! À réserver aux recherches ciblées et peu fréquentes. */
+/** Recherche de chaînes (100 unités par appel). */
+export async function apiSearchChannels(query: string, opts: { maxResults?: number; relevanceLanguage?: string; regionCode?: string } = {}): Promise<string[]> {
+  const r = await api<{ items?: { id: { channelId?: string } }[] }>(
+    "search",
+    {
+      part: "id",
+      type: "channel",
+      q: query,
+      maxResults: String(opts.maxResults ?? 50),
+      safeSearch: "moderate",
+      ...(opts.relevanceLanguage ? { relevanceLanguage: opts.relevanceLanguage } : {}),
+      ...(opts.regionCode ? { regionCode: opts.regionCode } : {}),
+    },
+    100,
+  );
+  return (r.items ?? []).map((i) => i.id.channelId).filter((x): x is string => Boolean(x));
+}
+
 export async function apiSearch(query: string, opts: { maxResults?: number; relevanceLanguage?: string; videoDuration?: "any" | "long" | "medium" | "short"; publishedAfter?: string } = {}): Promise<string[]> {
   const r = await api<{ items?: { id: { videoId?: string } }[] }>(
     "search",

@@ -16,7 +16,7 @@ export default function PrivacyPage() {
 
         <h2>Données stockées dans votre navigateur</h2>
         <p>
-          Vos favoris, votre historique, votre liste « À regarder plus tard », vos préférences et deux cookies d&apos;interface (thème et langue) sont enregistrés localement sur votre appareil.
+          Vos favoris, votre historique, votre liste « À regarder plus tard », vos préférences et trois cookies d&apos;interface (thème, langue de l&apos;interface et langue des vidéos) sont enregistrés localement sur votre appareil.
           Ils sont strictement nécessaires aux fonctions que vous utilisez et ne nécessitent pas de consentement préalable. Vous pouvez les exporter, les importer ou les effacer depuis les <Link href="/parametres">Paramètres</Link>.
         </p>
 

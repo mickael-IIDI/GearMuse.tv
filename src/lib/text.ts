@@ -112,6 +112,18 @@ export function idFromVideoSlug(slug: string): string | null {
 }
 
 /** Détection grossière FR/EN fondée sur les mots-outils. Marquée "heuristic" en base. */
+/**
+ * Titre manifestement en anglais : au moins deux mots-outils propres à l'anglais et aucun mot-outil français.
+ * Sert à ne pas appliquer la langue d'une chaîne francophone à ses vidéos publiées en anglais.
+ */
+export function looksEnglish(title: string): boolean {
+  const words = tokenize(title);
+  const english = new Set(["the", "and", "of", "how", "why", "this", "that", "what", "with", "from", "your", "my", "to", "for", "is", "are", "was", "learning", "best", "new", "first"]);
+  const french = new Set(["le", "la", "les", "des", "du", "de", "une", "un", "et", "avec", "pour", "dans", "sur", "qui", "que", "est", "au", "aux", "ce", "cette", "mon", "ma", "mes", "nous", "vous", "en", "comment", "pourquoi", "essai"]);
+  if (words.some((w) => french.has(w))) return false;
+  return words.filter((w) => english.has(w)).length >= 2;
+}
+
 export function guessLanguage(text: string): "fr" | "en" | null {
   const t = tokenize(text);
   if (t.length < 3) return null;

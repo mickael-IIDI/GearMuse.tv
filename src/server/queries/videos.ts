@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { sql, type SQL } from "drizzle-orm";
 import { getDb, rows } from "@/db/client";
 import type { Labels } from "@/db/schema";
@@ -108,8 +109,7 @@ export function filterConditions(f: VideoFilters): SQL[] {
     case "long": c.push(sql`v.duration_seconds >= 1200 and v.duration_seconds < 3600`); break;
     case "tres-long": c.push(sql`v.duration_seconds >= 3600`); break;
   }
-  if (f.langue === "fr" || f.langue === "en") c.push(sql`v.language = ${f.langue}`);
-  if (f.langue === "autre") c.push(sql`v.language is not null and v.language not in ('fr', 'en')`);
+  if (f.langue) c.push(sql`v.language = ${f.langue}`);
   switch (f.qualite) {
     case "pepites": c.push(sql`(v.discovery_score >= 30 or (v.recommender_count >= 2 and v.view_count < 100000))`); break;
     case "incontournables": c.push(sql`v.recommender_count >= 3 and v.quality_score >= 60`); break;
@@ -282,7 +282,7 @@ export async function videosByExternalIds(ids: string[]): Promise<VideoCard[]> {
 }
 
 /** Vidéos similaires : recouvrement pondéré de sous-catégories, marques, modèles, tags, thèmes et chaîne. */
-export async function relatedVideos(videoId: number, limit = 16): Promise<VideoCard[]> {
+export async function relatedVideos(videoId: number, limit = 16, language?: string): Promise<VideoCard[]> {
   const db = await getDb();
   const res = await db.execute(sql`
     with feats as (
@@ -302,29 +302,39 @@ export async function relatedVideos(videoId: number, limit = 16): Promise<VideoC
     ),
     agg as (select vid, sum(s) as s from cand where vid <> ${videoId} group by vid)
     select ${CARD_COLUMNS} from agg join videos v on v.id = agg.vid left join creators cr on cr.id = v.creator_id
-    where v.status = 'published'
+    where v.status = 'published'${language ? sql` and v.language = ${language}` : sql``}
     order by agg.s + coalesce(v.quality_score, 0) / 25.0 desc limit ${limit}`);
   return rows<Row>(res).map(toCard);
 }
 
-export async function sameBrandOrModel(videoId: number, limit = 8): Promise<{ label: string; href: string; items: VideoCard[] } | null> {
+export async function sameBrandOrModel(videoId: number, limit = 8, language?: string): Promise<{ label: string; href: string; items: VideoCard[] } | null> {
   const db = await getDb();
   const model = rows<{ id: number; name: string; slug: string; bslug: string }>(
     await db.execute(sql`select m.id, m.name, m.slug, b.slug as bslug from video_models vm join vehicle_models m on m.id = vm.model_id join brands b on b.id = m.brand_id where vm.video_id = ${videoId} order by vm.confidence desc limit 1`),
   )[0];
   if (model) {
-    const items = await listVideos({ filters: { marque: model.bslug, modele: model.slug }, pageSize: limit + 1 });
+    const items = await listVideos({ filters: { marque: model.bslug, modele: model.slug, langue: language }, pageSize: limit + 1 });
     const list = items.items.filter((v) => v.id !== videoId).slice(0, limit);
     if (list.length) return { label: model.name, href: `/marques/${model.bslug}/${model.slug}`, items: list };
   }
   const brand = rows<{ name: string; slug: string }>(await db.execute(sql`select b.name, b.slug from video_brands vb join brands b on b.id = vb.brand_id where vb.video_id = ${videoId} order by vb.confidence desc limit 1`))[0];
   if (brand) {
-    const items = await listVideos({ filters: { marque: brand.slug }, pageSize: limit + 1 });
+    const items = await listVideos({ filters: { marque: brand.slug, langue: language }, pageSize: limit + 1 });
     const list = items.items.filter((v) => v.id !== videoId).slice(0, limit);
     if (list.length) return { label: brand.name, href: `/marques/${brand.slug}`, items: list };
   }
   return null;
 }
+
+/** Langues réellement présentes dans le catalogue publié, calculées une seule fois par rendu. */
+export const publishedLanguages = cache(async () => {
+  const db = await getDb();
+  const r = rows<{ language: string | null; n: number }>(await db.execute(sql`select language, count(*)::int as n from videos where status = 'published' group by language`));
+  return {
+    total: r.reduce((sum, x) => sum + Number(x.n), 0),
+    languages: r.filter((x) => x.language).map((x) => ({ code: x.language as string, count: Number(x.n) })),
+  };
+});
 
 export async function catalogCounts() {
   const db = await getDb();

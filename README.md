@@ -32,6 +32,7 @@ npm run dev                        # http://localhost:3000
 | `npm run ingest -- stats` | État du catalogue |
 | `npm run admin:create -- <email> <rôle>` | Créer / modifier un administrateur (`ADMIN_PASSWORD` en variable) |
 | `npm run review:apply` | Appliquer une revue éditoriale (fichiers de décisions, voir docs/REVUE-EDITORIALE.md) |
+| `npm run channels:find` | Chercher des chaînes francophones candidates via l'API YouTube (liste à examiner, 4 000 unités environ) |
 | `npm run brand:generate` | Régénérer le symbole, les icônes, l'image de partage et le kit de marque (voir docs/MARQUE.md) |
 | `npm run lint` / `typecheck` / `test` / `test:e2e` | Qualité : ESLint, TypeScript strict, Vitest, Playwright |
 

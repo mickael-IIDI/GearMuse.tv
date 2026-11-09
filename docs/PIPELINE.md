@@ -24,7 +24,8 @@ en ligne de commande (`npm run ingest -- …`), depuis l'administration (« Tâc
 - **Chaînes spécialisées et officielles** : liste éditoriale (`src/lib/taxonomy/sources.ts`), identifiants résolus via Wikidata (P2397)
   ou, pour `VERIFIED_CHANNELS`, par leur handle via l'API YouTube (`channels.list forHandle`, 1 unité) après contrôle humain du titre
   et de la description ; dans tous les cas **revérifiés** par le flux RSS public de YouTube (titre concordant). Les chaînes non vérifiées
-  sont ignorées et journalisées. `discover_channels {"channelIds":[…]}` limite une remontée aux chaînes indiquées.
+  sont ignorées et journalisées. `discover_channels {"channelIds":[…]}` limite une remontée aux chaînes indiquées, `{"language":"fr"}` aux chaînes d'une langue,
+  et `{"topPerChannel":N}` ne garde que les N vidéos les plus vues (ni Shorts, ni directs). `npm run channels:find` cherche de nouvelles chaînes francophones à examiner.
   Avec la clé API, `discover_channels {"backfillPages":N}` remonte les N×50 dernières vidéos de chaque chaîne, et
   `{"pagesByUniverse":{"moto":10,"nautisme":10}}` cible plus profondément les univers sous-représentés.
   Shorts (≤ 60 s, ou ≤ 3 min avec #shorts ou au moins deux mots-dièses dans le titre) et diffusions en direct

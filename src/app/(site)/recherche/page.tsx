@@ -5,7 +5,8 @@ import { LoadMore } from "@/components/video/load-more";
 import { VideoCard } from "@/components/video/video-card";
 import { EmptyState, PageHeader } from "@/components/ui/page-header";
 import { filtersToSearchParams, parseFilters } from "@/lib/filters";
-import { getI18n } from "@/server/locale";
+import { LanguageResetButton } from "@/components/video-language/picker";
+import { getI18n, getVideoLanguage } from "@/server/locale";
 import { searchVideos } from "@/server/queries/videos";
 
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
@@ -26,7 +27,8 @@ const EXAMPLES = [
 
 export default async function SearchPage({ searchParams }: Props) {
   const { t, locale } = await getI18n();
-  const { q, filters, sort } = parseFilters(await searchParams);
+  const { q, filters: urlFilters, sort } = parseFilters(await searchParams);
+  const filters = { ...urlFilters, langue: await getVideoLanguage() };
   if (!q) {
     return (
       <>
@@ -47,12 +49,12 @@ export default async function SearchPage({ searchParams }: Props) {
         {r.suggestion && (
           <p className="mt-2 text-sm text-muted">
             {t.search.didYouMean}{" "}
-            <Link className="font-medium text-link underline" href={`/recherche?${filtersToSearchParams(filters, { q: r.suggestion }).toString()}`}>{r.suggestion}</Link>
+            <Link className="font-medium text-link underline" href={`/recherche?${filtersToSearchParams(urlFilters, { q: r.suggestion }).toString()}`}>{r.suggestion}</Link>
           </p>
         )}
         {r.relaxed && <p className="mt-2 text-sm text-muted">{t.search.relaxed(q)}</p>}
       </PageHeader>
-      <FilterBar search playAllIds={r.items.map((v) => v.externalId)} />
+      <FilterBar search />
       {r.items.length ? (
         <>
           <div className="flex max-w-5xl flex-col gap-5">
@@ -65,6 +67,7 @@ export default async function SearchPage({ searchParams }: Props) {
       ) : (
         <EmptyState title={t.search.none(q)}>
           <p>{t.search.noneHint}</p>
+          {filters.langue && <LanguageResetButton />}
           <div className="mt-4 flex flex-wrap justify-center gap-2">
             {EXAMPLES.slice(0, 4).map((e) => (
               <Link key={e} href={`/recherche?q=${encodeURIComponent(e)}`} className="rounded-full bg-soft px-3 py-1.5 text-xs hover:bg-hover">{e}</Link>

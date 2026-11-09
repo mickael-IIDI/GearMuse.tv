@@ -45,5 +45,6 @@ la qualité prime sur la popularité, la valeur durable sur l'actualité. En cas
 - **Diversité** : au plus 40 vidéos publiées par chaîne au total (déjà publiées comprises) ; au-delà, garder les meilleures et classer les autres `P-RESERVE`.
 - **Langues** : une vidéo dans une autre langue que le français ou l'anglais est acceptable si sa valeur est évidente.
 - **Recommandations** : une vidéo déjà recommandée sur Hacker News (colonne `reco` > 0) mérite une attention favorable.
+- **Périmètre** : l'espace (fusées, capsules, sondes, missions) en fait partie ; les rediffusions de directs de plusieurs heures relèvent de `R-FAIBLE`.
 - **Prudence** : ne jamais approuver sur la seule notoriété de la chaîne ; le titre doit indiquer un contenu de valeur.
 - **Traçabilité** : chaque décision assistée est enregistrée comme telle (« revue assistée par Claude Code à la demande du propriétaire »), avec son code ; elle est réversible depuis l'administration.

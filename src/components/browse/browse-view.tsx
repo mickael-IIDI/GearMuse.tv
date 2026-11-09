@@ -4,7 +4,8 @@ import { VideoGrid } from "@/components/video/video-card";
 import { Chips, EmptyState, PageHeader } from "@/components/ui/page-header";
 import { filtersToSearchParams, parseFilters, type FilterKey, type SortKey, type VideoFilters } from "@/lib/filters";
 import { catalogCounts, listVideos } from "@/server/queries/videos";
-import { getI18n } from "@/server/locale";
+import { LanguageResetButton } from "@/components/video-language/picker";
+import { getI18n, getVideoLanguage } from "@/server/locale";
 
 type SP = Record<string, string | string[] | undefined>;
 
@@ -30,9 +31,9 @@ export async function BrowseView({
   groups?: FilterKey[];
   intro?: React.ReactNode;
 }) {
-  const { t, locale } = await getI18n();
+  const [{ t, locale }, language] = await Promise.all([getI18n(), getVideoLanguage()]);
   const parsed = parseFilters(searchParams);
-  const filters = { ...parsed.filters, ...fixed };
+  const filters = { ...parsed.filters, ...fixed, langue: language };
   const sort = parsed.sort ?? defaultSort;
   const [list, counts] = await Promise.all([listVideos({ filters, sort, page: 1, withTotal: true }), catalogCounts()]);
   const query = filtersToSearchParams(filters, { tri: sort }).toString();
@@ -43,15 +44,16 @@ export async function BrowseView({
         {list.total != null && <p className="mt-2 text-sm text-faint">{t.common.videos(list.total)}</p>}
       </PageHeader>
       {intro}
-      {chips && <Chips items={chips} />}
-      <FilterBar groups={groups} durationKnownPct={pct} playAllIds={list.items.map((v) => v.externalId)} locked={Object.keys(fixed)} />
+      {/* Les compteurs des pastilles portent sur tout le catalogue : ils sont masqués quand une langue est choisie. */}
+      {chips && <Chips items={language ? chips.map((c) => ({ ...c, count: undefined })) : chips} />}
+      <FilterBar groups={groups} durationKnownPct={pct} locked={Object.keys(fixed)} />
       {list.items.length ? (
         <>
           <VideoGrid items={list.items} locale={locale} />
           <LoadMore key={query} endpoint="/api/videos" query={query} initialHasMore={list.hasMore} />
         </>
       ) : (
-        <EmptyState title={t.filters.empty} />
+        <EmptyState title={language ? t.videoLanguage.empty : t.filters.empty}>{language && <LanguageResetButton />}</EmptyState>
       )}
     </>
   );

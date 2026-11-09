@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { editDistance, extractYouTubeIds, formatDuration, guessLanguage, idFromVideoSlug, normalize, parseIsoDuration, parseYouTubeId, slugify, videoSlug } from "@/lib/text";
+import { editDistance, extractYouTubeIds, formatDuration, guessLanguage, idFromVideoSlug, normalize, parseIsoDuration, parseYouTubeId, slugify, videoSlug, looksEnglish } from "@/lib/text";
 
 describe("normalisation", () => {
   it("retire accents, ponctuation et casse", () => {
@@ -57,5 +57,18 @@ describe("durées et divers", () => {
   it("devine la langue sur des titres explicites", () => {
     expect(guessLanguage("Comment fonctionne le moteur d'une voiture électrique")).toBe("fr");
     expect(guessLanguage("How the engine of this car works")).toBe("en");
+  });
+});
+
+describe("titres manifestement anglais", () => {
+  it("reconnaît un titre anglais", () => {
+    expect(looksEnglish("Learning how to fly the Boeing 737-800")).toBe(true);
+    expect(looksEnglish("How does an airplane fly by pilot Alexander")).toBe(false);
+  });
+
+  it("ne confond pas un titre français ou neutre", () => {
+    expect(looksEnglish("On vous explique tout sur la Clio")).toBe(false);
+    expect(looksEnglish("BMW M3 Competition")).toBe(false);
+    expect(looksEnglish("Essai de la best of the best")).toBe(false);
   });
 });

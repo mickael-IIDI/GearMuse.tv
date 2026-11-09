@@ -154,7 +154,7 @@ export function toast(message: string) {
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("vc:toast", { detail: message }));
 }
 
-/* Cookies d'interface (thème, langue) lisibles par le serveur pour un rendu sans clignotement. */
-export function setUiCookie(name: "theme" | "lang", value: string) {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+/* Cookies d'interface (thème, langue, langue des vidéos) lisibles par le serveur pour un rendu sans clignotement. null : supprime le cookie. */
+export function setUiCookie(name: "theme" | "lang" | "video_lang", value: string | null) {
+  document.cookie = `${name}=${encodeURIComponent(value ?? "")}; path=/; max-age=${value === null ? 0 : 60 * 60 * 24 * 365}; samesite=lax`;
 }

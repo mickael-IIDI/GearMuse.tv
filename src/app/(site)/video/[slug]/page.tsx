@@ -9,7 +9,8 @@ import { VideoCard } from "@/components/video/video-card";
 import { RelativeDate } from "@/components/ui/relative-date";
 import { label } from "@/lib/i18n";
 import { formatDuration, truncate } from "@/lib/text";
-import { getI18n } from "@/server/locale";
+import { LanguagePicker } from "@/components/video-language/picker";
+import { getI18n, getVideoLanguage } from "@/server/locale";
 import { getVideoPage } from "@/server/queries/catalog";
 import { relatedVideos, sameBrandOrModel } from "@/server/queries/videos";
 
@@ -55,7 +56,8 @@ export default async function VideoPage({ params }: Props) {
   if (v.slug !== slug) permanentRedirect(`/video/${v.slug}`);
   const { t, locale } = await getI18n();
   const en = locale === "en";
-  const [related, sameModel] = await Promise.all([relatedVideos(v.id, 16), sameBrandOrModel(v.id, 8)]);
+  const language = await getVideoLanguage();
+  const [related, sameModel] = await Promise.all([relatedVideos(v.id, 16, language), sameBrandOrModel(v.id, 8, language)]);
   const url = `${siteConfig.url}/video/${v.slug}`;
   const universe = card.universe;
   const hnStories = evidence.filter((e) => e.kind === "community_upvote");
@@ -251,7 +253,10 @@ export default async function VideoPage({ params }: Props) {
       </article>
 
       <aside className="w-full shrink-0 xl:w-[402px]" aria-label={t.video.related}>
-        <h2 className="mb-3 font-display text-base font-semibold">{t.video.related}</h2>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-semibold">{t.video.related}</h2>
+          <LanguagePicker />
+        </div>
         <div className="flex flex-col gap-3">
           {related.map((x) => (
             <VideoCard key={x.id} v={x} locale={locale} variant="compact" />

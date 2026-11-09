@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { library, setUiCookie, toast, useLibrary } from "@/components/library/store";
 import { useI18n } from "@/components/locale-provider";
+import { useVideoLanguage } from "@/components/video-language/provider";
 import { FILTER_GROUPS } from "@/lib/filters";
 
 const UNIVERSES: [string, string, string][] = [
@@ -28,9 +29,15 @@ export function SettingsForm({ theme }: { theme: string }) {
   const en = locale === "en";
   const router = useRouter();
   const lib = useLibrary();
+  const videoLanguage = useVideoLanguage();
   const [mode, setMode] = useState(theme);
   const file = useRef<HTMLInputElement>(null);
 
+  const chooseVideoLanguage = (code: string | null) => {
+    videoLanguage.setLanguage(code);
+    toast(t.settings.saved);
+  };
+  const count = (n: number) => n.toLocaleString(en ? "en" : "fr-FR");
   const toggleIn = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
   const chip = (on: boolean) => `rounded-full border px-4 py-1.5 text-sm ${on ? "border-transparent bg-[var(--chip-active-bg)] text-[var(--chip-active-text)]" : "border-line hover:bg-hover"}`;
 
@@ -76,6 +83,20 @@ export function SettingsForm({ theme }: { theme: string }) {
             </button>
           ))}
         </div>
+      </Section>
+
+      <Section title={t.videoLanguage.label}>
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t.videoLanguage.label}>
+          <button type="button" role="radio" aria-checked={!videoLanguage.current} className={chip(!videoLanguage.current)} onClick={() => chooseVideoLanguage(null)}>
+            {t.videoLanguage.all} <span className="opacity-70">{count(videoLanguage.total)}</span>
+          </button>
+          {videoLanguage.options.map((o) => (
+            <button key={o.code} type="button" role="radio" aria-checked={videoLanguage.current === o.code} className={chip(videoLanguage.current === o.code)} onClick={() => chooseVideoLanguage(o.code)}>
+              {o.label} <span className="opacity-70">{count(o.count)}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-muted">{t.videoLanguage.hint}</p>
       </Section>
 
       <Section title={t.settings.universes}>

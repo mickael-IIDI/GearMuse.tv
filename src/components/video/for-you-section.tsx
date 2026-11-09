@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLibrary, type LibraryState } from "@/components/library/store";
 import { useI18n } from "@/components/locale-provider";
+import { useVideoLanguage } from "@/components/video-language/provider";
 import type { VideoCard as Card } from "@/server/queries/videos";
 import { VideoCard } from "./video-card";
 
-export async function fetchRecommendations(lib: LibraryState, locale: string, page = 1): Promise<{ items: Card[]; personalized: boolean }> {
+export async function fetchRecommendations(lib: LibraryState, locale: string, page = 1, language?: string | null): Promise<{ items: Card[]; personalized: boolean }> {
   const r = await fetch("/api/recommandations", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -20,6 +21,7 @@ export async function fetchRecommendations(lib: LibraryState, locale: string, pa
       seed: lib.seed,
       page,
       locale,
+      language: language ?? undefined,
     }),
   });
   if (!r.ok) throw new Error(String(r.status));
@@ -30,14 +32,15 @@ export async function fetchRecommendations(lib: LibraryState, locale: string, pa
 export function ForYouSection() {
   const { t, locale } = useI18n();
   const lib = useLibrary();
+  const { current: language } = useVideoLanguage();
   const [items, setItems] = useState<Card[] | null>(null);
   const hasSignals = lib.favorites.length + lib.history.length + lib.later.length + lib.prefs.universes.length > 0;
-  const key = `${lib.favorites.length}-${lib.history.length}-${lib.later.length}-${lib.prefs.universes.join(",")}-${lib.seed}`;
+  const key = `${lib.favorites.length}-${lib.history.length}-${lib.later.length}-${lib.prefs.universes.join(",")}-${lib.seed}-${language ?? ""}`;
 
   useEffect(() => {
     if (!hasSignals) return;
     let cancelled = false;
-    fetchRecommendations(lib, locale)
+    fetchRecommendations(lib, locale, 1, language)
       .then((r) => !cancelled && setItems(r.items.slice(0, 8)))
       .catch(() => !cancelled && setItems([]));
     return () => {

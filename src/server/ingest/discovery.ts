@@ -3,6 +3,7 @@ import { getDb } from "@/db/client";
 import { creators, importBatches, sources, videos } from "@/db/schema";
 import { classify } from "@/lib/taxonomy/classifier";
 import { CURATED_CHANNELS, EXCLUDED_CHANNEL_IDS, HN_DISCOVERY_QUERIES, REDDIT_SUBREDDITS, VERIFIED_CHANNELS } from "@/lib/taxonomy/sources";
+import { FRENCH_CHANNELS } from "@/lib/taxonomy/sources-fr";
 import { editDistance, normalize, parseYouTubeId } from "@/lib/text";
 import { getSetting } from "@/server/settings";
 import { hnCommentDiscovery, hnItemUrl, hnMentionsOf, hnYouTubeStories } from "./hn";
@@ -10,7 +11,7 @@ import { pMap } from "./http";
 import { analyzeVideos, consoleLogger, enrichVideos, registerCandidate, scoreVideos, type Logger } from "./pipeline";
 import { redditEnabled, redditTopVideos } from "./reddit";
 import { channelIdsByName } from "./wikidata";
-import { apiChannels, apiPlaylistVideoIds, channelFeed, youtubeApiEnabled } from "./youtube";
+import { apiChannels, apiPlaylistVideoIds, apiVideos, channelFeed, youtubeApiEnabled } from "./youtube";
 
 /** Pré-filtre peu coûteux sur un titre avant toute requête vers YouTube. */
 function plausiblyInScope(title: string, hint?: string | null): boolean {
@@ -23,17 +24,17 @@ function plausiblyInScope(title: string, hint?: string | null): boolean {
 /* ------------------------------------------------------------------ */
 
 /** Inscrit (ou met à jour) une chaîne vérifiée comme source et comme créateur suivi. Ne réactive jamais une source désactivée. */
-export async function upsertChannelSource(c: { channelId: string; title: string; universe: string | null; trust: number; official: boolean; extra?: Record<string, unknown> }) {
+export async function upsertChannelSource(c: { channelId: string; title: string; universe: string | null; trust: number; official: boolean; language?: string; extra?: Record<string, unknown> }) {
   const db = await getDb();
-  const config = { channelId: c.channelId, ...(c.extra ?? {}) };
+  const config = { channelId: c.channelId, ...(c.language ? { language: c.language } : {}), ...(c.extra ?? {}) };
   await db
     .insert(sources)
     .values({ type: "youtube_channel", name: c.title, config, universeHint: c.universe, trustLevel: c.trust, isOfficial: c.official, verifiedAt: new Date() })
     .onConflictDoUpdate({ target: [sources.type, sources.name], set: { config, verifiedAt: new Date(), updatedAt: new Date() } });
   await db
     .insert(creators)
-    .values({ key: `yt:channel:${c.channelId}`, channelId: c.channelId, name: c.title, url: `https://www.youtube.com/channel/${c.channelId}`, isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust })
-    .onConflictDoUpdate({ target: creators.key, set: { isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust, updatedAt: new Date() } });
+    .values({ key: `yt:channel:${c.channelId}`, channelId: c.channelId, name: c.title, url: `https://www.youtube.com/channel/${c.channelId}`, isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust, language: c.language })
+    .onConflictDoUpdate({ target: creators.key, set: { isCuratedSource: true, isOfficial: c.official, trustLevel: c.trust, ...(c.language ? { language: c.language } : {}), updatedAt: new Date() } });
 }
 
 export async function resolveCuratedSources(log: Logger = consoleLogger) {
@@ -66,7 +67,7 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
     log.stat("sources_verified");
   }
   // Chaînes identifiées par leur identifiant (résolu via l'API YouTube), revérifiées par RSS.
-  for (const seed of VERIFIED_CHANNELS) {
+  for (const seed of [...VERIFIED_CHANNELS, ...FRENCH_CHANNELS]) {
     const feed = await channelFeed(seed.channelId);
     const a = normalize(feed?.title ?? "");
     const b = normalize(seed.name);
@@ -75,7 +76,7 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
       await log.warn(`Chaîne non vérifiée, ignorée : ${seed.name} (${seed.channelId})${feed ? ` — titre du flux : « ${feed.title} »` : ""}`);
       continue;
     }
-    await upsertChannelSource({ channelId: seed.channelId, title: feed.title, universe: seed.universe, trust: seed.trust, official: seed.official ?? false });
+    await upsertChannelSource({ channelId: seed.channelId, title: feed.title, universe: seed.universe, trust: seed.trust, official: seed.official ?? false, language: seed.language });
     log.stat("sources_verified");
   }
   // Requêtes HN et subreddits (configurables ensuite depuis l'administration)
@@ -88,6 +89,17 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
   }
 }
 
+/** Vidéos les plus vues d'une liste, hors Shorts et directs : limite le volume importé pour les grandes chaînes. */
+async function topVideos(ids: string[], limit: number): Promise<string[]> {
+  const MIN_SECONDS = 180;
+  const details = await apiVideos(ids);
+  return [...details.entries()]
+    .filter(([, v]) => v.embeddable && (v.durationSeconds ?? 0) >= MIN_SECONDS && v.liveBroadcastContent === "none")
+    .sort(([, a], [, b]) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+    .slice(0, limit)
+    .map(([id]) => id);
+}
+
 /* ------------------------------------------------------------------ */
 /* Découverte : flux RSS des chaînes suivies                           */
 /* ------------------------------------------------------------------ */
@@ -96,11 +108,15 @@ export async function resolveCuratedSources(log: Logger = consoleLogger) {
  * @param opts.backfillPages pages de 50 vidéos à remonter par chaîne (clé API requise)
  * @param opts.pagesByUniverse profondeur spécifique par univers indicatif (ex. { moto: 10 }) pour cibler les univers sous-représentés
  * @param opts.channelIds limite l'exécution à ces chaînes (ex. sources tout juste ajoutées)
+ * @param opts.language limite l'exécution aux chaînes de cette langue
+ * @param opts.topPerChannel ne garde du catalogue que les N vidéos les plus vues (ni Shorts, ni directs, intégrables)
  */
-export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number; pagesByUniverse?: Record<string, number>; channelIds?: string[] } = {}) {
+export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { backfillPages?: number; pagesByUniverse?: Record<string, number>; channelIds?: string[]; language?: string; topPerChannel?: number } = {}) {
   const db = await getDb();
   const all = await db.select().from(sources).where(and(eq(sources.type, "youtube_channel"), eq(sources.enabled, true)));
-  const list = opts.channelIds?.length ? all.filter((s) => opts.channelIds!.includes(String(s.config.channelId))) : all;
+  const list = all
+    .filter((s) => !opts.channelIds?.length || opts.channelIds.includes(String(s.config.channelId)))
+    .filter((s) => !opts.language || s.config.language === opts.language);
   for (const src of list) {
     const channelId = String(src.config.channelId ?? "");
     try {
@@ -142,7 +158,8 @@ export async function discoverChannelFeeds(log: Logger = consoleLogger, opts: { 
       if (youtubeApiEnabled() && pages > 0) {
         const [ch] = await apiChannels({ ids: [channelId] });
         if (ch?.uploadsPlaylistId) {
-          for (const vid of await apiPlaylistVideoIds(ch.uploadsPlaylistId, pages)) {
+          const uploads = await apiPlaylistVideoIds(ch.uploadsPlaylistId, pages);
+          for (const vid of opts.topPerChannel ? await topVideos(uploads, opts.topPerChannel) : uploads) {
             const r = await registerCandidate(db, {
               externalId: vid,
               channel: { channelId, name: feed.title },

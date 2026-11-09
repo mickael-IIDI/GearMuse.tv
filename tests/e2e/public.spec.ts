@@ -19,14 +19,72 @@ test.describe("Parcours visiteur", () => {
     await page.waitForURL(/\/univers\/aviation$/, { timeout: 60_000 });
     await expect(page.getByRole("heading", { level: 1, name: "Aviation" })).toBeVisible();
     await page.getByRole("button", { name: /Filtres/ }).click();
-    await page.getByRole("button", { name: "Anglais" }).click();
-    await expect(page).toHaveURL(/langue=en/);
+    await page.getByRole("button", { name: "Documentaire" }).click();
+    await expect(page).toHaveURL(/format=documentaire/);
     await page.getByRole("button", { name: /Filtres/ }).click();
     await page.getByRole("button", { name: "Les plus recommandées" }).click();
-    await expect(page).toHaveURL(/langue=en.*tri=recommandation|tri=recommandation.*langue=en/);
+    await expect(page).toHaveURL(/format=documentaire.*tri=recommandation|tri=recommandation.*format=documentaire/);
     // Le filtre actif s'affiche en pastille et se retire d'un clic
-    await page.getByRole("button", { name: /Retirer le filtre Anglais/ }).click();
-    await expect(page).not.toHaveURL(/langue=en/);
+    await page.getByRole("button", { name: /Retirer le filtre Documentaire/ }).click();
+    await expect(page).not.toHaveURL(/format=documentaire/);
+  });
+
+  test("langue des vidéos : choisie sur l'accueil, appliquée aux listes, modifiable dans les paramètres", async ({ page }) => {
+    await page.goto("/");
+    const picker = page.getByRole("combobox", { name: "Langue des vidéos" });
+    await expect(picker).toBeVisible();
+    // Un clic n'importe où sur la pastille ouvre la liste, pas seulement sur le texte.
+    const coversPill = await picker.evaluate((select) => {
+      const box = select.closest("label")!.getBoundingClientRect();
+      return [box.left + 14, box.left + box.width / 2, box.right - 12].every((x) => document.elementFromPoint(x, box.top + box.height / 2) === select);
+    });
+    expect(coversPill).toBe(true);
+    // Première langue proposée (dépend du catalogue) et nombre de vidéos annoncé.
+    const option = picker.locator("option").nth(1);
+    const code = (await option.getAttribute("value")) ?? "";
+    const announced = ((await option.textContent()) ?? "").match(/\(([^)]*)\)\s*$/)?.[1].replace(/\D/g, "");
+    expect(code).toMatch(/^[a-z]{2,3}$/);
+    await picker.selectOption(code);
+    await expect(picker).toHaveValue(code);
+    await expect(picker).toBeEnabled({ timeout: 30_000 });
+
+    await page.goto("/videos");
+    await expect(picker).toHaveValue(code);
+    const total = page.locator("#contenu header p").filter({ hasText: /vidéos?$/ }).first();
+    await expect.poll(async () => ((await total.textContent()) ?? "").replace(/\D/g, "")).toBe(announced);
+
+    await page.goto("/parametres");
+    const settings = page.getByRole("radiogroup", { name: "Langue des vidéos" });
+    await expect(settings.getByRole("radio", { checked: true })).not.toContainText("Toutes les langues");
+    await settings.getByRole("radio", { name: /Toutes les langues/ }).click();
+    await expect(settings.getByRole("radio", { checked: true })).toContainText("Toutes les langues");
+
+    await page.goto("/videos");
+    await expect(picker).toHaveValue("");
+  });
+
+  test("sous-catégorie active : le texte du filtre reste lisible dans les deux thèmes", async ({ page }) => {
+    await page.goto("/categories");
+    await page.locator('a[href^="/univers/aviation/"]').first().click();
+    await page.waitForURL(/\/univers\/aviation\/.+/, { timeout: 60_000 });
+    const chip = page.locator('#contenu a[aria-current="page"]').first();
+    await expect(chip).toBeVisible();
+    const luminance = (rgb: string) => {
+      const [r, g, b] = (rgb.match(/[\d.]+/g) ?? []).map(Number).map((c) => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    for (const theme of ["dark", "light"]) {
+      await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), theme);
+      const { color, background } = await chip.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { color: s.color, background: s.backgroundColor };
+      });
+      const [hi, lo] = [luminance(color), luminance(background)].sort((a, b) => b - a);
+      expect((hi + 0.05) / (lo + 0.05), `${theme} : ${color} sur ${background}`).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   test("recherche en langage naturel, correction orthographique et résultats vides", async ({ page }) => {
@@ -39,10 +97,10 @@ test.describe("Parcours visiteur", () => {
 
   test("autocomplétion depuis la barre de recherche", async ({ page }) => {
     await page.goto("/");
-    const box = page.getByRole("combobox");
+    const box = page.getByRole("combobox", { name: "Rechercher" });
     await box.fill("boein");
     await expect(page.getByRole("listbox")).toBeVisible();
-    await expect(page.getByRole("option").first()).toBeVisible();
+    await expect(page.getByRole("listbox").getByRole("option").first()).toBeVisible();
     await box.press("Enter");
     await expect(page).toHaveURL(/\/recherche\?q=boein/);
   });

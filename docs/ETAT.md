@@ -1,4 +1,4 @@
-# État du projet — 6 novembre 2026
+# État du projet — 9 novembre 2026
 
 **Nom et domaine** : GearMuse, `https://gearmuse.tv` (domaine acheté par le propriétaire le 6 novembre 2026). Symbole, favicon,
 icônes d'application, image de partage et kit de marque générés ([MARQUE.md](MARQUE.md)) ; URL canonique de production,
@@ -10,23 +10,34 @@ au projet Vercel selon [DEPLOIEMENT.md](DEPLOIEMENT.md) (section 3 bis).
 | Indicateur | Valeur |
 |---|---|
 | Stories Hacker News examinées (2007-2026, ≥ 5 points, liant YouTube) | 16 457 |
-| Chaînes suivies, vérifiées par RSS et actives | 56 : 27 via Wikidata + 29 moto/nautisme résolues par handle via l'API YouTube (`VERIFIED_CHANNELS`) ; « Airbus - Topic » et « NASA Marathon » (identifiants Wikidata erronés) exclues (`EXCLUDED_CHANNEL_IDS`) |
-| Vidéos candidates enregistrées (Hacker News + catalogues des chaînes suivies) | 13 060 |
-| Enrichies via la YouTube Data API (titre, description, mots-clés, durée, date, vues, langue, intégrabilité) | 12 971 |
-| **Publiées** | **1 862** — 519 par publication automatique + 1 343 approuvées en revue assistée ; toutes avec durée, date et vues |
-| En file de validation humaine | 677 (639 en réserve au titre du plafond de 40 par chaîne, 38 doutes à trancher) |
-| Rejetées (hors périmètre, insuffisantes, Shorts, directs, revue) | 10 432 |
+| Chaînes suivies, vérifiées par RSS et actives | 291 : 27 via Wikidata, 29 moto/nautisme résolues par handle (`VERIFIED_CHANNELS`), 235 francophones (`FRENCH_CHANNELS`) ; « Airbus - Topic », « NASA Marathon » et « La French Drive » exclues (`EXCLUDED_CHANNEL_IDS`) |
+| Vidéos candidates enregistrées (Hacker News + catalogues des chaînes suivies) | 27 284 |
+| Enrichies via la YouTube Data API (titre, description, mots-clés, durée, date, vues, langue, intégrabilité) | 27 195 |
+| **Publiées** | **5 681**, dont **3 888 en français** et 1 703 en anglais ; toutes avec durée, date et vues |
+| En file de validation humaine | 7 694, dont 6 555 en français (les meilleures vidéos de chaque chaîne ont déjà été examinées) |
+| Rejetées (hors périmètre, insuffisantes, Shorts, directs, revue) | 13 820 |
 | Indisponibles chez YouTube (supprimées / privées) | 89 |
-| Vidéos en français publiées | 81 |
+| Vidéos en français publiées | 3 888, issues de 229 chaînes (40 au plus par chaîne) |
 | Pépites (recommandées, moins de 100 000 vues) | 60 |
-| Vidéos de plus d'une heure publiées | 129 |
+| Vidéos de plus d'une heure publiées | 241 |
 | Playlists visibles (≥ 3 vidéos publiées) | 11 sur 11 |
-| Marques avec au moins une vidéo publiée | 97 |
-| URL dans le sitemap | 2 118 |
-| Consommation API YouTube du 5 novembre | 672 unités, 0 erreur (quota gratuit : 10 000 / jour) |
+| Marques avec au moins une vidéo publiée | 113 |
+| URL dans le sitemap | 6 005 |
+| Consommation API YouTube du 9 novembre | 6 812 unités, 0 erreur (quota gratuit : 10 000 / jour) |
 
-Répartition des vidéos publiées (univers principal) : bateaux 483, automobile 425, moto 424, autres véhicules
-(dont espace) 329, aviation 201.
+Répartition des vidéos publiées (une vidéo peut relever de plusieurs univers) : automobile 2 606, moto 1 303, bateaux 870,
+autres véhicules (dont espace) 670, aviation 566.
+
+### Vidéos francophones (9 novembre 2026)
+
+À la demande du propriétaire (au moins deux fois plus de vidéos en français que de vidéos en anglais), 235 chaînes francophones
+ont été retenues parmi 433 candidates trouvées par l'API YouTube (`npm run channels:find`, 40 recherches thématiques), d'après
+leur nom et leur présentation. Pour chacune, les 60 vidéos les plus vues parmi les 300 dernières (hors Shorts et directs) ont été
+importées, soit 14 224 candidates. Comme la note accorde 18 % aux recommandations indépendantes, quasi absentes pour ces vidéos,
+peu dépassent le seuil de publication automatique : les 25 mieux classées de chaque chaîne (5 480) ont donc été revues par sept
+agents (Claude Sonnet) selon [REVUE-EDITORIALE.md](REVUE-EDITORIALE.md) : 3 647 approuvées, 1 765 rejetées, 68 en attente.
+Un échantillon aléatoire de 100 décisions a été relu (environ une sur quinze discutable). Provenance enregistrée : « Revue assistée
+(Claude Code, 2026-11-09, demandée par le propriétaire) ». La décision repose sur les titres, sans visionnage.
 
 ### Revue de la file de validation (6 novembre 2026)
 
@@ -59,7 +70,8 @@ Les 3 signalements visibles dans l'administration locale proviennent des tests a
 | Interface : accueil à 10 sections, menu latéral complet, thème sombre/clair/système, FR/EN | Terminé | E2E |
 | Cartes vidéo (miniature officielle, durée, chaîne, vues, date, univers, sélection, pépite, note, langue, favori, plus tard) | Terminé | E2E |
 | Pages univers, sous-catégories, thèmes, technologies, marques, modèles, chaînes, catégories, longues, découvertes, mieux notées | Terminé | E2E + contrôle HTTP de toutes les routes |
-| Filtres combinables dans l'URL (date, durée, format, technologie, langue, sélection) et 9 tris | Terminé, alimentés par les métadonnées API | Unitaires + E2E |
+| Filtres combinables dans l'URL (date, durée, format, technologie, sélection) et 9 tris | Terminé, alimentés par les métadonnées API | Unitaires + E2E |
+| Langue des vidéos : sélecteur sur l'accueil, les listes, la recherche, les playlists, la bibliothèque, « Pour vous » et la page vidéo, réglage dans les paramètres ; langues réelles du catalogue avec leur nombre de vidéos ; préférence en cookie, sans compte | Terminé | Unitaires + E2E |
 | Recherche plein texte FR/EN, synonymes, expressions, correction orthographique (1 faute ≤ 6 lettres, 2 au-delà), élargissement, autocomplétion | Terminé | Unitaires + E2E |
 | Page vidéo : lecteur officiel au clic, repli si intégration désactivée, indisponible ou erreur de lecture, justification, preuves, détail de la note, similaires, même marque/modèle, partage, JSON-LD VideoObject | Terminé | E2E (lecture vérifiée manuellement dans le navigateur) |
 | Bibliothèque sans compte : favoris, historique (pause, effacement), à regarder plus tard, masquer, export/import | Terminé | Unitaires + E2E |
@@ -79,13 +91,13 @@ Les 3 signalements visibles dans l'administration locale proviennent des tests a
 
 ## Limites connues et travaux restants
 
-1. **Aviation (201) désormais l'univers le moins fourni** ; Reddit (r/aviation, r/flying) ou de nouvelles chaînes aéronautiques compléteraient la couverture.
-2. **Revue assistée à confirmer** : 1 343 approbations et 4 613 rejets reposent sur les titres (pas de visionnage) ; environ 5 % de décisions discutables, surtout des rejets sévères. 38 doutes et 639 vidéos en réserve restent à trancher par un humain. Les relecteurs ont parfois appliqué un code par défaut à des séries homogènes (lives, matériel, vlogs).
+1. **Aviation (566) reste l'univers le moins fourni** ; Reddit (r/aviation, r/flying) ou de nouvelles chaînes aéronautiques compléteraient la couverture.
+2. **Revues assistées à confirmer** : les 4 990 approbations et 6 378 rejets des revues du 6 et du 9 novembre reposent sur les titres (pas de visionnage) ; 5 à 7 % de décisions discutables. Les 106 doutes et les vidéos en réserve restent à trancher par un humain. La langue vient de YouTube ou, à défaut, de la chaîne, et peut être erronée. Les relecteurs ont parfois appliqué un code par défaut à des séries homogènes (lives, matériel, vlogs).
 3. **Classifieur à règles** : précis sur les titres explicites. Un titre qui ne cite aucun véhicule voit sa pertinence réduite et part en validation. Quelques sujets d'entreprise passent encore (ex. interviews d'Elon Musk via Tesla) ; l'analyse IA (clé Anthropic) les écarterait. Les résumés éditoriaux n'existent qu'avec l'IA ou la rédaction.
 4. **Base locale PGlite sous Windows** : erreurs d'entrée/sortie intermittentes (« could not open file … Invalid argument ») observées sous forte charge avec ~7 000 vidéos ; relancer l'étape suffit, aucune donnée perdue. En exploitation, utiliser PostgreSQL (Neon).
 5. **Recherche** lexicale uniquement (pas d'embeddings) ; à mesurer avant d'ajouter pgvector.
 6. **Limiteur de débit en mémoire** (par instance) : compléter par le pare-feu de l'hébergeur.
 7. **Purge à 12 mois** des propositions et signalements traités : à ajouter en tâche planifiée.
-8. **Internationalisation** : interface FR/EN par cookie ; pas encore d'URL préfixées par langue pour le référencement anglais. 81 vidéos en français publiées (Le Repaire des Motards, Vilebrequin) : sources francophones à renforcer (aviation, nautisme). La langue provient de la métadonnée déclarée par l'auteur quand elle existe et peut être erronée.
+8. **Internationalisation** : interface FR/EN par cookie ; pas encore d'URL préfixées par langue pour le référencement anglais. Depuis le 9 novembre, le français est majoritaire dans le catalogue, l'automobile concentrant plus de la moitié de ces vidéos ; aviation et nautisme restent à renforcer. La langue provient de la métadonnée déclarée par l'auteur quand elle existe et peut être erronée.
 9. **Images de playlists** : mosaïque des miniatures officielles (pas de visuel dédié).
 10. **npm audit** : 0 vulnérabilité dans les dépendances de production ; alertes modérées uniquement dans l'outillage de développement (esbuild via drizzle-kit, minimatch via typescript-eslint).

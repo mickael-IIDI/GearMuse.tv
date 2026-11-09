@@ -29,8 +29,9 @@ npm run ingest -- pipeline             # premier catalogue (10 à 20 min ; bien 
 ADMIN_PASSWORD='…' npm run admin:create -- vous@exemple.fr owner "Votre nom"
 ```
 
-Pour reprendre le catalogue local déjà constitué plutôt que de relancer l'ingestion : `pg_dump` depuis PGlite n'étant pas
-direct, la voie la plus simple est de relancer le pipeline contre Neon (les sources sont publiques et l'ingestion est déterministe).
+**Attention au catalogue local.** Relancer le pipeline contre Neon reconstitue les vidéos, mais pas les décisions éditoriales des
+revues (près de 11 400 décisions enregistrées dans la base PGlite locale) : les vidéos concernées resteraient en validation, et le
+catalogue publié serait bien plus petit. Il faut donc transférer la base locale vers Neon avant la mise en ligne, sans relancer le pipeline.
 
 ## 3. Vercel
 

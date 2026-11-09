@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "review:apply": "tsx scripts/apply-review.ts",
-    "brand:generate": "tsx scripts/brand/generate.tsx"
+    "brand:generate": "tsx scripts/brand/generate.tsx",
+    "channels:find": "tsx scripts/find-channels.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.5.0",

@@ -157,7 +157,12 @@ async function main() {
     const version = (await dst.query<{ v: string }>("select current_setting('server_version') as v")).rows[0].v;
     const hasSchema = Boolean((await dst.query<{ t: string | null }>("select to_regclass('public.videos')::text as t")).rows[0].t);
     const existing = hasSchema ? await count(dst, "videos") : 0;
-    console.log(`Cible (${dst.kind}, PostgreSQL ${version}) : ${hasSchema ? `schéma présent, ${fmt(existing)} vidéo(s)` : "vide"}.`);
+    // Hôte et base affichés sans le mot de passe, pour vérifier qu'il s'agit bien de la base voulue.
+    const where = dst.kind === "pg" ? (() => { const u = new URL(targetUrl); return `${u.hostname}${u.pathname}`; })() : targetUrl;
+    console.log(`Cible (${dst.kind}, PostgreSQL ${version}, ${where}) : ${hasSchema ? `schéma présent, ${fmt(existing)} vidéo(s)` : "vide"}.`);
+    // Des tables inconnues signalent la base d'une autre application : on n'y écrit jamais.
+    const foreign = (await dst.query<{ t: string }>("select tablename as t from pg_tables where schemaname = 'public'")).rows.map((r) => r.t).filter((t) => !p.tables.includes(t) && !EXCLUDED_TABLES.has(t));
+    if (foreign.length) throw new Error(`La base cible contient des tables étrangères à GearMuse (${foreign.slice(0, 8).join(", ")}${foreign.length > 8 ? "…" : ""}) : elle appartient sans doute à une autre application. Vérifiez l'adresse (projet Neon « gearmuse »).`);
     if (existing > 0 && !replace) throw new Error(`La base cible contient déjà ${fmt(existing)} vidéo(s). Relancez avec --replace pour la remplacer (les comptes d'administration de la cible sont conservés).`);
     if (dryRun) {
       console.log("Contrôle terminé, aucune écriture.");

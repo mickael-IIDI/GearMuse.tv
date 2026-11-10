@@ -2,8 +2,9 @@
 
 **Nom et domaine** : GearMuse, `https://gearmuse.tv` (domaine acheté par le propriétaire le 6 novembre 2026). Symbole, favicon,
 icônes d'application, image de partage et kit de marque générés ([MARQUE.md](MARQUE.md)) ; URL canonique de production,
-redirection www → apex et non-indexation des adresses secondaires en place. **Site non encore déployé** : reliez le domaine
-au projet Vercel selon [DEPLOIEMENT.md](DEPLOIEMENT.md) (section 3 bis).
+redirection www → apex et non-indexation des adresses secondaires en place. Code publié sur GitHub
+(mickael-IIDI/GearMuse.tv, intégration continue au vert). **Site non encore déployé** : copier la base locale vers Neon
+(`npm run db:transfer`, section 2), puis Vercel et le domaine selon [DEPLOIEMENT.md](DEPLOIEMENT.md) (sections 3 et 3 bis).
 
 ## Catalogue réel constitué (base locale PGlite, aucune donnée inventée)
 

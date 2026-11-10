@@ -21,17 +21,40 @@ durées, dates, vues, langues et descriptions alimentent alors les filtres de du
 
 ## 2. Base Neon
 
+**Copier le catalogue local (à faire une fois, avant la mise en ligne).** Les décisions éditoriales des revues (11 384 vidéos
+verrouillées) n'existent que dans la base PGlite locale : relancer le pipeline contre Neon reconstituerait les vidéos, pas ces
+décisions. `npm run db:transfer` copie toute la base locale dans Neon : migrations, puis les 27 tables avec leurs identifiants,
+dans une seule transaction, avec comparaison des comptes table par table à la fin.
+
+1. Créez le projet Neon (région Europe, par exemple Francfort). Copiez deux URL : la **directe** (sans « -pooler ») pour la copie,
+   la **pooled** pour `DATABASE_URL` sur Vercel. Toutes deux avec `sslmode=require`.
+2. Arrêtez le serveur de développement : la base locale n'accepte qu'un processus.
+3. Contrôle à blanc (aucune écriture), puis copie :
+
 ```bash
-# .env.local ou variables de l'hébergeur
+TARGET_DATABASE_URL="postgresql://…@ep-….eu-central-1.aws.neon.tech/neondb?sslmode=require" npm run db:transfer -- --dry-run
+TARGET_DATABASE_URL="postgresql://…@ep-….eu-central-1.aws.neon.tech/neondb?sslmode=require" npm run db:transfer -- --slim
+```
+
+Sous PowerShell : `$env:TARGET_DATABASE_URL="postgresql://…"; npm run db:transfer -- --dry-run`.
+
+- `--slim` ne garde que la dernière analyse de chaque vidéo (l'historique ne sert pas au site) : environ 300 Mo au lieu de 340 Mo
+  (mesures du 10 novembre 2026). Sans l'option, tout est copié.
+- La copie refuse une base qui contient déjà des vidéos ; `--replace` la vide d'abord (en conservant ses comptes d'administration).
+- Les comptes et sessions d'administration locaux ne sont pas copiés : le compte propriétaire de production est créé à la première
+  connexion avec `ADMIN_EMAIL` / `ADMIN_PASSWORD` (variables Vercel), ou avec
+  `ADMIN_PASSWORD='…' npm run admin:create -- vous@exemple.fr owner "Votre nom"` (avec `DATABASE_URL` pointant vers Neon).
+- Testé le 10 novembre 2026 vers une seconde base PGlite : 314 727 lignes identiques en 2 min, statuts, décisions verrouillées,
+  recherche et numérotation reprises à l'identique. Le pilote réseau (node-postgres) n'a pas pu être essayé contre un vrai serveur
+  PostgreSQL ; la préparation des valeurs qu'il reçoit est couverte par `tests/unit/transfer.test.ts`.
+
+Sans catalogue local à reprendre (nouvelle installation), on crée le catalogue directement :
+
+```bash
 DATABASE_URL="postgresql://…-pooler.…neon.tech/neondb?sslmode=require"
 npm run db:migrate                     # crée l'extension pg_trgm et les tables
 npm run ingest -- pipeline             # premier catalogue (10 à 20 min ; bien plus rapide avec la clé YouTube)
-ADMIN_PASSWORD='…' npm run admin:create -- vous@exemple.fr owner "Votre nom"
 ```
-
-**Attention au catalogue local.** Relancer le pipeline contre Neon reconstitue les vidéos, mais pas les décisions éditoriales des
-revues (près de 11 400 décisions enregistrées dans la base PGlite locale) : les vidéos concernées resteraient en validation, et le
-catalogue publié serait bien plus petit. Il faut donc transférer la base locale vers Neon avant la mise en ligne, sans relancer le pipeline.
 
 ## 3. Vercel
 

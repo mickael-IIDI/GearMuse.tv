@@ -25,6 +25,7 @@ npm run dev                        # http://localhost:3000
 |---|---|
 | `npm run dev` / `build` / `start` | Next.js (développement, build, production) |
 | `npm run db:generate` / `db:migrate` | Générer / appliquer les migrations SQL (Drizzle) |
+| `npm run db:transfer` | Copier la base locale vers PostgreSQL / Neon avant la mise en ligne (voir docs/DEPLOIEMENT.md) |
 | `npm run ingest -- pipeline` | Pipeline complet (premier catalogue) |
 | `npm run ingest -- daily` | Mise à jour incrémentale quotidienne |
 | `npm run ingest -- step <tâche> [json]` | Une étape (ex. `step discover_hn_stories '{"fromYear":2024}'`) |

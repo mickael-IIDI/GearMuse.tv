@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:transfer": "tsx scripts/transfer-db.ts",
     "ingest": "tsx scripts/ingest.ts",
     "admin:create": "tsx scripts/create-admin.ts",
     "test": "vitest run",

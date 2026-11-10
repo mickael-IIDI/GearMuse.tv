@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "drizzle-orm";
-import { databaseDriver, getDb } from "@/db/client";
+import { DatabaseConfigError, databaseDriver, getDb } from "@/db/client";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +12,7 @@ export async function GET() {
     return NextResponse.json({ ok: true, driver: databaseDriver(), published: r.rows[0]?.n ?? 0 }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     console.error(JSON.stringify({ level: "error", msg: "health_check_failed", error: String(e) }));
-    return NextResponse.json({ ok: false }, { status: 503 });
+    // Seule une erreur de configuration est détaillée : les autres peuvent contenir l'adresse du serveur.
+    return NextResponse.json({ ok: false, ...(e instanceof DatabaseConfigError ? { error: e.message } : {}) }, { status: 503, headers: { "Cache-Control": "no-store" } });
   }
 }

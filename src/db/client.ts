@@ -63,6 +63,17 @@ function acquireLock(dir: string) {
   return release;
 }
 
+/** Configuration manquante en production : message sans secret, affichable par la sonde /api/health. */
+export class DatabaseConfigError extends Error {
+  constructor() {
+    super(
+      "DATABASE_URL absente ou invalide (elle doit commencer par postgresql://). Sur Vercel, la base locale PGlite est impossible : " +
+        "ajoutez DATABASE_URL (Neon) dans Settings → Environment Variables, puis redéployez (voir docs/DEPLOIEMENT.md).",
+    );
+    this.name = "DatabaseConfigError";
+  }
+}
+
 async function open(): Promise<DB> {
   if (databaseDriver() === "pg") {
     const { Pool } = await import("pg");
@@ -75,6 +86,8 @@ async function open(): Promise<DB> {
     holder.close = async () => pool.end();
     return drizzlePg(pool, { schema });
   }
+  // Hébergement sans disque inscriptible (Vercel) : la base locale est impossible, PostgreSQL est obligatoire.
+  if (process.env.VERCEL) throw new DatabaseConfigError();
   const dir = pgliteDir();
   const release = acquireLock(dir);
   const { PGlite } = await import("@electric-sql/pglite");

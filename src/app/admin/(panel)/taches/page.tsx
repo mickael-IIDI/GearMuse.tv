@@ -32,8 +32,8 @@ export default async function JobsPage() {
             {Object.entries(JOB_TYPES).map(([type, d]) => (
               <form key={type} action={runJobAction} className="flex items-center justify-between gap-3 rounded-xl border border-line p-3">
                 <div className="min-w-0"><div className="text-sm font-medium">{d.label}</div><div className="text-xs text-muted">{d.description}</div>
-                  {(type === "analyze" || type === "discover_hn_stories" || type === "discover_channels") && (
-                    <input name="params" placeholder={type === "analyze" ? '{"force":true}' : type === "discover_channels" ? '{"backfillPages":2}' : '{"fromYear":2024}'} className={`${input} mt-1 py-1 font-mono text-xs`} />
+                  {(type === "analyze" || type === "score" || type === "discover_hn_stories" || type === "discover_channels") && (
+                    <input name="params" placeholder={type === "analyze" ? '{"force":true}' : type === "score" ? '{"full":true}' : type === "discover_channels" ? '{"backfillPages":2}' : '{"fromYear":2024}'} className={`${input} mt-1 py-1 font-mono text-xs`} />
                   )}
                 </div>
                 <input type="hidden" name="type" value={type} /><button className={btnGhost}>Lancer</button>

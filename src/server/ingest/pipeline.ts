@@ -536,12 +536,26 @@ export async function rebuildSearchText(videoIds?: number[]) {
 /* Étapes 6-8 : évaluation, publication, contrôle                      */
 /* ------------------------------------------------------------------ */
 
-export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; log?: Logger } = {}) {
+/**
+ * Notation et décision de publication.
+ * Par défaut (incrémental), seules les vidéos à (re)noter sont traitées : jamais notées, réanalysées, modifiées ou
+ * nouvellement recommandées depuis leur dernière note. `full: true` renote tout le catalogue (après un changement
+ * de pondérations, par exemple) : à lancer de préférence près de la base, la notation faisant une requête par critère.
+ */
+export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; full?: boolean; log?: Logger } = {}) {
   const db = await getDb();
   const log = opts.log ?? consoleLogger;
   const scoring = await getSetting("scoring");
   const ingestion = await getSetting("ingestion");
-  const where = opts.videoIds?.length ? inArray(videos.id, opts.videoIds) : and(ne(videos.title, ""), eq(videos.needsReanalysis, false), notInArray(videos.status, ["excluded"]));
+  const toScore = or(
+    isNull(videos.scoredAt),
+    sql`${videos.analyzedAt} > ${videos.scoredAt}`,
+    sql`${videos.updatedAt} > ${videos.scoredAt} + interval '5 seconds'`,
+    sql`exists (select 1 from recommendation_evidence e where e.video_id = ${videos.id} and e.created_at > ${videos.scoredAt})`,
+  );
+  const where = opts.videoIds?.length
+    ? inArray(videos.id, opts.videoIds)
+    : and(ne(videos.title, ""), eq(videos.needsReanalysis, false), notInArray(videos.status, ["excluded"]), opts.full ? undefined : toScore);
   const list = await db.select().from(videos).where(where).limit(opts.limit ?? 100000);
   log.info(`Notation de ${list.length} vidéo(s)`);
   for (const v of list) {
@@ -564,6 +578,8 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
     const effective = v.scoreOverride ?? res.total;
     const decision = decideStatus({ total: effective, confidence: res.confidence, relevance: analysisRow.output.relevance, inScope: analysisRow.output.inScope, availability: v.availability, isShort: v.isShort, isLive: v.isLive }, scoring.thresholds, ingestion.autoPublish);
     const statusChange = !v.statusLocked && decision.status !== v.status;
+    // Même horodatage pour la note et la modification : la vidéo ne repasse pas à la notation suivante.
+    const now = new Date();
     await db
       .update(videos)
       .set({
@@ -571,7 +587,7 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
         scoreConfidence: res.confidence,
         scoreBreakdown: res.breakdown,
         scoreVersion: scoring.version,
-        scoredAt: new Date(),
+        scoredAt: now,
         discoveryScore: res.discoveryScore,
         recommenderCount: res.aggregates.recommenderCount,
         recommendationMonths: res.aggregates.recommendationMonths,
@@ -584,11 +600,11 @@ export async function scoreVideos(opts: { videoIds?: number[]; limit?: number; l
           ? {
               status: decision.status,
               statusReason: decision.reason,
-              statusChangedAt: new Date(),
-              ...(decision.status === "published" && !v.publishedOnSiteAt ? { publishedOnSiteAt: new Date() } : {}),
+              statusChangedAt: now,
+              ...(decision.status === "published" && !v.publishedOnSiteAt ? { publishedOnSiteAt: now } : {}),
             }
           : {}),
-        updatedAt: new Date(),
+        updatedAt: now,
       })
       .where(eq(videos.id, v.id));
     log.stat(`status_${v.statusLocked ? v.status : decision.status}`);

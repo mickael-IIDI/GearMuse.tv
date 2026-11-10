@@ -11,7 +11,7 @@ en ligne de commande (`npm run ingest -- …`), depuis l'administration (« Tâc
 | 3 | Enrichissement | `enrich` | Avec `YOUTUBE_API_KEY` : `videos.list` (1 unité par lot de 50) puis `channels.list`. Sans clé : oEmbed (titre, chaîne, miniature) |
 | 4 | Vérification | `enrich`, `refresh_availability` | oEmbed : 200 disponible, 401/403 intégration désactivée ou privée, 404 supprimée ; API : vidéos absentes = indisponibles |
 | 5 | Analyse | `analyze` | Classifieur à règles (par défaut) ou modèle de langage : univers, sous-catégories, thèmes, formats, technologies, marques, modèles, niveau, temporalité, profondeur technique, pédagogie, intérêt historique, langue, résumé (IA) |
-| 6 | Évaluation | `score` | Note sur 100 explicable (voir ci-dessous) |
+| 6 | Évaluation | `score` | Note sur 100 explicable (voir ci-dessous). Incrémentale : seules les vidéos jamais notées, réanalysées, modifiées ou nouvellement recommandées depuis leur note sont traitées ; `score {"full":true}` renote tout le catalogue (après un changement de pondérations), de préférence depuis une machine proche de la base |
 | 7 | Publication | `score` | Seuils : publication automatique si note ≥ `publish`, confiance ≥ `minConfidence` et pertinence ≥ `minRelevance` ; au plus `maxAutoPublishPerChannel` (25) vidéos par chaîne sans recommandation indépendante (les mieux notées), le surplus part en validation |
 | 8 | Contrôle | `score` + administration | Note entre `review` et `publish` → file de validation ; en dessous → rejet. Un statut fixé par un éditeur est verrouillé |
 | 9 | Actualisation | `refresh_availability`, `discover_hn_mentions` | Revérification au plus tard tous les 25 jours (règles YouTube : 30 jours max.), recherche de nouveaux recommandeurs |

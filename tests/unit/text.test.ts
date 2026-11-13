@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { editDistance, extractYouTubeIds, formatDuration, guessLanguage, idFromVideoSlug, normalize, parseIsoDuration, parseYouTubeId, slugify, videoSlug, looksEnglish } from "@/lib/text";
+import { creatorSlug, editDistance, idFromCreatorSlug, extractYouTubeIds, formatDuration, guessLanguage, idFromVideoSlug, normalize, parseIsoDuration, parseYouTubeId, slugify, videoSlug, looksEnglish } from "@/lib/text";
 
 describe("normalisation", () => {
   it("retire accents, ponctuation et casse", () => {
@@ -70,5 +70,20 @@ describe("titres manifestement anglais", () => {
     expect(looksEnglish("On vous explique tout sur la Clio")).toBe(false);
     expect(looksEnglish("BMW M3 Competition")).toBe(false);
     expect(looksEnglish("Essai de la best of the best")).toBe(false);
+  });
+});
+
+describe("adresses des chaînes", () => {
+  it("combine identifiant et nom lisible", () => {
+    expect(creatorSlug(42, "Direct Auto")).toBe("42-direct-auto");
+    expect(creatorSlug(7, "Jay Leno's Garage")).toBe("7-jay-leno-s-garage");
+    expect(creatorSlug(9, "日本")).toBe("9");
+  });
+  it("retrouve l'identifiant, y compris dans l'ancienne forme", () => {
+    expect(idFromCreatorSlug("42-direct-auto")).toBe(42);
+    expect(idFromCreatorSlug("42")).toBe(42);
+    expect(idFromCreatorSlug("direct-auto")).toBeNull();
+    expect(idFromCreatorSlug("0")).toBeNull();
+    expect(idFromCreatorSlug("42abc")).toBeNull();
   });
 });

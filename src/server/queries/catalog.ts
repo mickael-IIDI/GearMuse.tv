@@ -65,6 +65,31 @@ export async function getCreator(id: number) {
   return db.query.creators.findFirst({ where: eq(creators.id, id) });
 }
 
+/** Chaîne et faits mesurés sur ses vidéos publiées (aucune valeur estimée). */
+export async function getCreatorPage(id: number) {
+  const db = await getDb();
+  const creator = await db.query.creators.findFirst({ where: eq(creators.id, id) });
+  if (!creator) return null;
+  const totals = rows<{ published: number; picks: number }>(
+    await db.execute(sql`select count(*)::int as published, count(*) filter (where editorial_pick)::int as picks from videos where creator_id = ${id} and status = 'published'`),
+  )[0];
+  const top = rows<{ external_id: string; thumbnail_url: string | null }>(
+    await db.execute(sql`select external_id, thumbnail_url from videos where creator_id = ${id} and status = 'published' order by quality_score desc nulls last, id limit 1`),
+  )[0];
+  const unis = rows<{ slug: string; labels: unknown; n: number }>(
+    await db.execute(sql`select c.slug, c.labels::text as labels, count(distinct v.id)::int as n
+      from videos v join video_categories vc on vc.video_id = v.id join categories c on c.id = vc.category_id and c.kind = 'universe'
+      where v.creator_id = ${id} and v.status = 'published' group by c.id, c.slug, c.labels::text order by n desc, c.slug limit 3`),
+  );
+  return {
+    creator,
+    published: Number(totals?.published ?? 0),
+    picks: Number(totals?.picks ?? 0),
+    image: top ? (top.thumbnail_url ?? `https://i.ytimg.com/vi/${top.external_id}/hqdefault.jpg`) : null,
+    universes: unis.map((u) => ({ slug: u.slug, labels: JSON.parse(String(u.labels)) as { fr: string; en?: string }, count: Number(u.n) })),
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Page vidéo                                                          */
 /* ------------------------------------------------------------------ */

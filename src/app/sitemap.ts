@@ -2,13 +2,14 @@ import type { MetadataRoute } from "next";
 import { sql } from "drizzle-orm";
 import { getDb, rows } from "@/db/client";
 import { siteConfig } from "@/config/site";
+import { creatorSlug } from "@/lib/text";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 /**
- * Plan du site : uniquement les pages utiles (vidéos publiées, catégories, marques
- * et playlists suffisamment fournies). Les pages trop pauvres sont exclues.
+ * Plan du site : uniquement les pages utiles (vidéos publiées, catégories, marques,
+ * chaînes et playlists suffisamment fournies). Les pages trop pauvres sont exclues.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
@@ -21,8 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const brands = rows<{ slug: string }>(await db.execute(sql`select slug from brands where video_count >= 3`));
   const models = rows<{ slug: string; b: string }>(await db.execute(sql`select m.slug, b.slug as b from vehicle_models m join brands b on b.id = m.brand_id where m.video_count >= 3`));
   const pls = rows<{ slug: string }>(await db.execute(sql`select p.slug from playlists p where p.status = 'published' and (select count(*) from playlist_items pi join videos v on v.id = pi.video_id where pi.playlist_id = p.id and v.status = 'published') >= 3`));
+  const channels = rows<{ id: number; name: string }>(
+    await db.execute(sql`select cr.id, cr.name from creators cr join videos v on v.creator_id = cr.id and v.status = 'published' group by cr.id, cr.name having count(*) >= 3`),
+  );
   return [
     ...statics,
+    ...channels.map((c) => ({ url: `${base}/chaine/${creatorSlug(Number(c.id), c.name)}`, changeFrequency: "weekly" as const, priority: 0.5 })),
     ...unis.map((u) => ({ url: `${base}/univers/${u.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
     ...subs.map((s) => ({ url: `${base}/univers/${s.u}/${s.slug}`, changeFrequency: "weekly" as const, priority: 0.6 })),
     ...themes.map((t) => ({ url: t.kind === "theme" ? `${base}/themes/${t.slug}` : `${base}/technologies/${t.slug.replace("techno-", "")}`, changeFrequency: "weekly" as const, priority: 0.5 })),

@@ -105,6 +105,17 @@ export function videoSlug(title: string, externalId: string): string {
   return `${slugify(title, 70)}-${externalId}`;
 }
 
+/** Adresse d'une page de chaîne : « 42-nom-de-la-chaine » (l'identifiant seul si le nom ne donne rien). */
+export function creatorSlug(id: number, name: string): string {
+  return normalize(name) ? `${id}-${slugify(name, 60)}` : String(id);
+}
+
+/** Identifiant en tête d'une adresse de chaîne ; l'ancienne forme « 42 » reste acceptée. */
+export function idFromCreatorSlug(slug: string): number | null {
+  const m = slug.match(/^([1-9]\d{0,8})(?:-.*)?$/);
+  return m ? Number(m[1]) : null;
+}
+
 /** Retrouve l'identifiant fournisseur à la fin d'un slug "titre-ID". */
 export function idFromVideoSlug(slug: string): string | null {
   const m = slug.match(/([A-Za-z0-9_-]{11})$/);

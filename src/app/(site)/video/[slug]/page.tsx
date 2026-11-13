@@ -9,7 +9,7 @@ import { Expandable, VideoActions } from "@/components/video/video-actions";
 import { VideoCard } from "@/components/video/video-card";
 import { RelativeDate } from "@/components/ui/relative-date";
 import { label } from "@/lib/i18n";
-import { formatDuration, truncate } from "@/lib/text";
+import { creatorSlug, formatDuration, truncate } from "@/lib/text";
 import { LanguagePicker } from "@/components/video-language/picker";
 import { getI18n, getVideoLanguage } from "@/server/locale";
 import { getVideoPage } from "@/server/queries/catalog";
@@ -112,7 +112,7 @@ export default async function VideoPage({ params }: Props) {
           <div className="min-w-0 text-sm">
             {creator && (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <Link href={`/chaine/${creator.id}`} className="font-semibold hover:text-accent">{creator.name}</Link>
+                <Link href={`/chaine/${creatorSlug(creator.id, creator.name)}`} className="font-semibold hover:text-accent">{creator.name}</Link>
                 {creator.isOfficial && <span className="rounded bg-soft px-1.5 py-0.5 text-xs text-muted">{en ? "Official" : "Officielle"}</span>}
                 {creator.isCuratedSource && !creator.isOfficial && <span className="rounded bg-soft px-1.5 py-0.5 text-xs text-muted">{en ? "Followed channel" : "Chaîne suivie"}</span>}
                 {creator.url && (

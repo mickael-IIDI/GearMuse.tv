@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { siteConfig } from "@/config/site";
+import { AffiliateBlock } from "@/components/affiliate/affiliate-block";
 import { IconExternal, IconFlag } from "@/components/icons";
 import { Player } from "@/components/video/player";
 import { Expandable, VideoActions } from "@/components/video/video-actions";
@@ -66,6 +67,11 @@ export default async function VideoPage({ params }: Props) {
   const formats = categories.filter((c) => c.kind === "format");
   const techs = categories.filter((c) => c.kind === "technology");
   const breakdown = v.scoreBreakdown;
+  // Liens affiliés : le premier modèle identifié, sinon la première marque ; rien sur une vidéo non publiée.
+  const affiliateName = v.status === "published" ? (models[0]?.name ?? brands[0]?.name) : undefined;
+  const affiliateSubject = affiliateName
+    ? { name: affiliateName, brand: models[0] ? brands.find((b) => b.slug === models[0].bslug)?.name : undefined, universes: universe ? [universe.slug] : [] }
+    : null;
 
   const jsonLd: Record<string, unknown>[] = [
     {
@@ -241,6 +247,8 @@ export default async function VideoPage({ params }: Props) {
             <IconFlag size={13} /> {t.video.report}
           </Link>
         </div>
+
+        {affiliateSubject && <AffiliateBlock className="mt-6" subject={affiliateSubject} />}
 
         {sameModel && (
           <section className="mt-8">

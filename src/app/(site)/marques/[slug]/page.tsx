@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AffiliateBlock } from "@/components/affiliate/affiliate-block";
 import { BrowseView } from "@/components/browse/browse-view";
 import { getI18n } from "@/server/locale";
 import { getBrand } from "@/server/queries/catalog";
@@ -31,6 +32,7 @@ export default async function BrandPage({ params, searchParams }: Props) {
       crumbs={[{ href: "/marques", label: t.nav.brands }]}
       chips={r.models.map((m) => ({ href: `/marques/${slug}/${m.slug}`, label: m.name, count: m.videoCount }))}
       defaultSort="qualite"
+      outro={<AffiliateBlock className="mt-10" subject={{ name: r.brand.name, universes: r.brand.universes }} />}
     />
   );
 }

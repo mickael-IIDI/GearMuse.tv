@@ -20,6 +20,7 @@ export async function BrowseView({
   chips,
   groups,
   intro,
+  outro,
 }: {
   searchParams: SP;
   fixed?: VideoFilters;
@@ -30,6 +31,8 @@ export async function BrowseView({
   chips?: { href: string; label: string; active?: boolean; count?: number }[];
   groups?: FilterKey[];
   intro?: React.ReactNode;
+  /** Contenu affiché après la première page de vidéos, avant celles chargées au défilement. */
+  outro?: React.ReactNode;
 }) {
   const [{ t, locale }, language] = await Promise.all([getI18n(), getVideoLanguage()]);
   const parsed = parseFilters(searchParams);
@@ -50,6 +53,7 @@ export async function BrowseView({
       {list.items.length ? (
         <>
           <VideoGrid items={list.items} locale={locale} />
+          {outro}
           <LoadMore key={query} endpoint="/api/videos" query={query} initialHasMore={list.hasMore} />
         </>
       ) : (

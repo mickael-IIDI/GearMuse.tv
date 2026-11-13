@@ -167,6 +167,15 @@ const fr = {
     empty: "Aucune vidéo dans cette langue ici",
     showAll: "Voir toutes les langues",
   },
+  affiliate: {
+    title: (name: string) => `Pour aller plus loin : ${name}`,
+    badge: "Liens affiliés",
+    kinds: { scale: "Miniatures et maquettes", books: "Livres", parts: "Pièces et accessoires", collectibles: "Objets de collection" },
+    on: (kind: string, merchant: string) => `${kind} sur ${merchant}`,
+    disclosure: (site: string) => `${site} peut percevoir une commission sur ces liens, sans surcoût pour vous. La sélection et la note des vidéos n'en dépendent pas.`,
+    amazon: (site: string) => `En tant que Partenaire Amazon, ${site} réalise un bénéfice sur les achats remplissant les conditions requises.`,
+    more: "En savoir plus",
+  },
   common: {
     loadMore: "Charger plus",
     loading: "Chargement…",
@@ -209,6 +218,15 @@ const en: Dict = {
   forYou: { title: "For you", intro: "Recommendations computed from your favorites, history and preferences, stored only in this browser.", coldStart: "No history yet: here is a starter selection. Add favorites or pick universes in Settings to personalise this feed.", more: "More recommendations", hide: "Don't suggest again" },
   settings: { title: "Settings", theme: "Theme", dark: "Dark", light: "Light", system: "System", language: "Interface language", universes: "Favorite universes", formats: "Preferred content types", duration: "Preferred duration", any: "Any", history: "History", historyEnabled: "Record watched videos", clearHistory: "Clear history", resetReco: "Reset recommendations", resetDone: "Recommendations reset.", player: "Video player", autoLoad: "Load the YouTube player without a prior click", export: "Export my local data", import: "Import a file", importDone: "Data imported.", importError: "Invalid file.", privacy: "All these preferences stay in your browser (local storage). Nothing is sent to our servers, except anonymously and on the fly to compute your recommendations.", saved: "Saved" },
   videoLanguage: { label: "Video language", all: "All languages", hint: "Applies to the home page and every video list, in this browser.", empty: "No videos in this language here", showAll: "Show all languages" },
+  affiliate: {
+    title: (name) => `Go further: ${name}`,
+    badge: "Affiliate links",
+    kinds: { scale: "Scale models", books: "Books", parts: "Parts and accessories", collectibles: "Collectibles" },
+    on: (kind, merchant) => `${kind} on ${merchant}`,
+    disclosure: (site) => `${site} may earn a commission on these links, at no extra cost to you. Video selection and scores do not depend on it.`,
+    amazon: (site) => `As an Amazon Associate, ${site} earns from qualifying purchases.`,
+    more: "Learn more",
+  },
   common: { loadMore: "Load more", loading: "Loading…", back: "Back", videos: (n) => `${n.toLocaleString("en")} video${n > 1 ? "s" : ""}`, minutes: (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")}` : `${m} min`), none: "Nothing to show yet.", error: "Something went wrong.", notFound: "Page not found", notFoundText: "This page does not exist or is no longer available." },
 };
 

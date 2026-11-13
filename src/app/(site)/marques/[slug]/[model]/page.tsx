@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { AffiliateBlock } from "@/components/affiliate/affiliate-block";
 import { BrowseView } from "@/components/browse/browse-view";
 import { getI18n } from "@/server/locale";
 import { getModel } from "@/server/queries/catalog";
@@ -33,6 +34,7 @@ export default async function ModelPage({ params, searchParams }: Props) {
         { href: `/marques/${slug}`, label: r.brand.name },
       ]}
       defaultSort="qualite"
+      outro={<AffiliateBlock className="mt-10" subject={{ name: r.model.name, brand: r.brand.name, universes: r.model.universe ? [r.model.universe] : r.brand.universes }} />}
     />
   );
 }

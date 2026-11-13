@@ -34,6 +34,17 @@ Analyse :
 - Formulaires : données minimales, empreinte non réversible de l'adresse IP (anti-abus), conservation limitée (12 mois, à appliquer par une purge planifiée — voir ETAT.md).
 - Page confidentialité, mentions légales (champs éditeur à compléter), contact, export / import / effacement des données locales.
 
+## Liens affiliés
+
+Désactivés par défaut : rien ne s'affiche tant que `AFFILIATE_AMAZON_TAG` ou `AFFILIATE_EBAY_CAMPAIGN_ID` n'est pas renseigné (`src/lib/affiliates.ts`).
+
+- **Simples liens de recherche** vers le marchand, construits à partir du nom de la marque ou du modèle. Aucun script, image, widget ni cookie tiers : la politique de sécurité du contenu est inchangée et aucun bandeau de consentement n'est requis. Le suivi commence chez le marchand, après le clic.
+- **Liens directs**, sans redirection intermédiaire qui masquerait la destination.
+- **Signalés** : mention « Liens affiliés » sur chaque bloc, attribut `rel="sponsored nofollow noopener"`, phrase imposée par Amazon affichée quand un lien Amazon est présent, sections dédiées dans « À propos » et « Confidentialité » (affichées dès qu'un programme est actif).
+- **Éloignés du lecteur** : le bloc est placé après la première page de vidéos (marques, modèles) ou sous le panneau éditorial (page vidéo), jamais dans ni contre le lecteur YouTube.
+- **Sans effet sur la curation** : le code de sélection et de notation ne lit aucune donnée d'affiliation.
+- À vérifier avant l'activation : conditions de chaque programme, et identifiant de rotation eBay (`EBAY_FR_ROTATION`) à comparer avec un lien produit par le générateur d'eBay.
+
 ## Droits des créateurs
 
 - Titres, chaînes et liens vers les chaînes affichés ; aucune réutilisation du contenu des vidéos.

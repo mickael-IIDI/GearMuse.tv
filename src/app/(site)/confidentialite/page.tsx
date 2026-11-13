@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { PageHeader } from "@/components/ui/page-header";
+import { affiliateEnabled, serverAffiliateEnv } from "@/lib/affiliates";
 
 export const metadata: Metadata = { title: "Politique de confidentialité", alternates: { canonical: "/confidentialite" } };
 
@@ -33,6 +34,16 @@ export default function PrivacyPage() {
           Ce site utilise les services d&apos;API de YouTube. En les utilisant, vous acceptez les <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer">conditions d&apos;utilisation de YouTube</a>.
           Les miniatures sont chargées depuis les serveurs de YouTube (i.ytimg.com).
         </p>
+
+        {affiliateEnabled(serverAffiliateEnv()) && (
+          <>
+            <h2>Liens affiliés</h2>
+            <p>
+              Certaines pages proposent des liens vers des marchands, signalés par la mention « Liens affiliés » (voir <Link href="/a-propos#affiliation">À propos</Link>). Ce sont de simples liens : ils ne chargent aucun script, image ni cookie sur ce site.
+              Si vous cliquez, le marchand reçoit un identifiant indiquant que vous venez de {siteConfig.name} et peut déposer ses propres cookies, selon ses règles de confidentialité. Nous ne lui transmettons aucune donnée vous concernant.
+            </p>
+          </>
+        )}
 
         <h2>Formulaires</h2>
         <p>

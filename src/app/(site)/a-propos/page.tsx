@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { PageHeader } from "@/components/ui/page-header";
+import { affiliateEnabled, serverAffiliateEnv } from "@/lib/affiliates";
 import { getSetting } from "@/server/settings";
 import { catalogCounts } from "@/server/queries/videos";
 
@@ -73,6 +74,17 @@ export default async function AboutPage() {
         <p>
           Nous affichons les miniatures officielles fournies par YouTube, sans modification. Nous n&apos;extrayons aucune image des vidéos : cela supposerait de télécharger les contenus, ce que les conditions de YouTube interdisent.
         </p>
+
+        {affiliateEnabled(serverAffiliateEnv()) && (
+          <>
+            <h2 id="affiliation">Liens affiliés</h2>
+            <p>
+              Certaines pages (marques, modèles, vidéos) proposent des liens vers des marchands, signalés par la mention « Liens affiliés ». Si vous achetez après avoir suivi l&apos;un d&apos;eux, {siteConfig.name} peut percevoir une commission, sans surcoût pour vous.
+              Ces liens sont générés automatiquement à partir du nom de la marque ou du modèle : ils ne sont pas des recommandations de produits, et ils n&apos;ont <strong>aucune influence sur la sélection, le classement ou la note des vidéos</strong>.
+              Aucun traceur n&apos;est chargé sur ce site ; le suivi commence chez le marchand, après votre clic.
+            </p>
+          </>
+        )}
 
         <h2>Inspiration</h2>
         <p>
